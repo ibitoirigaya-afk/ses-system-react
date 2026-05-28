@@ -16,8 +16,8 @@ export default function ProposalHistoryManualCreatePage({
   onCreate,
   onCancel,
 }: Props) {
-  const [projectId, setProjectId] = useState(projects[0]?.id ?? 0)
-  const [engineerId, setEngineerId] = useState(engineers[0]?.id ?? 0)
+  const [projectId, setProjectId] = useState(0)
+  const [engineerId, setEngineerId] = useState(0)
   const [proposedDate, setProposedDate] = useState(
     new Date().toISOString().slice(0, 10),
   )
@@ -27,19 +27,39 @@ export default function ProposalHistoryManualCreatePage({
   const [memo, setMemo] = useState('')
 
   const handleSubmit = () => {
-    const newProposalHistory: ProposalHistory = {
-      id: Date.now(),
-      projectId,
-      engineerId,
-      proposedDate,
-      interviewDate,
-      interviewResult,
-      status,
-      memo,
-    }
-
-    onCreate(newProposalHistory)
+  if (projectId === 0) {
+    alert('案件を選択してください。')
+    return
   }
+
+  if (engineerId === 0) {
+    alert('要員を選択してください。')
+    return
+  }
+
+  if (proposedDate.trim() === '') {
+    alert('提案日を入力してください。')
+    return
+  }
+
+  if (status.trim() === '') {
+    alert('ステータスを選択してください。')
+    return
+  }
+
+  const newProposalHistory: ProposalHistory = {
+    id: Date.now(),
+    projectId,
+    engineerId,
+    proposedDate,
+    interviewDate,
+    interviewResult,
+    status,
+    memo,
+  }
+
+  onCreate(newProposalHistory)
+}
 
   if (projects.length === 0 || engineers.length === 0) {
     return (
@@ -86,16 +106,18 @@ export default function ProposalHistoryManualCreatePage({
               案件
             </label>
             <select
-              value={projectId}
-              onChange={(event) => setProjectId(Number(event.target.value))}
-              className="w-full rounded border border-gray-300 px-3 py-2"
-            >
-              {projects.map((project) => (
-                <option key={project.id} value={project.id}>
-                  {project.title}
-                </option>
-              ))}
-            </select>
+  value={projectId}
+  onChange={(event) => setProjectId(Number(event.target.value))}
+  className="w-full rounded border border-gray-300 px-3 py-2"
+>
+  <option value={0}>案件を選択してください</option>
+
+  {projects.map((project) => (
+    <option key={project.id} value={project.id}>
+      {project.title}
+    </option>
+  ))}
+</select>
           </div>
 
           <div>
@@ -103,16 +125,18 @@ export default function ProposalHistoryManualCreatePage({
               要員
             </label>
             <select
-              value={engineerId}
-              onChange={(event) => setEngineerId(Number(event.target.value))}
-              className="w-full rounded border border-gray-300 px-3 py-2"
-            >
-              {engineers.map((engineer) => (
-                <option key={engineer.id} value={engineer.id}>
-                  {engineer.name}
-                </option>
-              ))}
-            </select>
+  value={engineerId}
+  onChange={(event) => setEngineerId(Number(event.target.value))}
+  className="w-full rounded border border-gray-300 px-3 py-2"
+>
+  <option value={0}>要員を選択してください</option>
+
+  {engineers.map((engineer) => (
+    <option key={engineer.id} value={engineer.id}>
+      {engineer.name}
+    </option>
+  ))}
+</select>
           </div>
 
           <div>

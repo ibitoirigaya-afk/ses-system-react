@@ -57,19 +57,39 @@ export default function ProposalHistoryCreatePage({
   }
 
   const handleSubmit = () => {
-    const newProposalHistory: ProposalHistory = {
-      id: Date.now(),
-      projectId: project.id,
-      engineerId: engineer.id,
-      proposedDate,
-      interviewDate,
-      interviewResult,
-      status,
-      memo,
-    }
-
-    onCreate(newProposalHistory)
+  if (!project) {
+    alert('案件が見つかりません。')
+    return
   }
+
+  if (!engineer) {
+    alert('要員が見つかりません。')
+    return
+  }
+
+  if (proposedDate.trim() === '') {
+    alert('提案日を入力してください。')
+    return
+  }
+
+  if (status.trim() === '') {
+    alert('ステータスを選択してください。')
+    return
+  }
+
+  const newProposalHistory: ProposalHistory = {
+    id: Date.now(),
+    projectId: project.id,
+    engineerId: engineer.id,
+    proposedDate,
+    interviewDate,
+    interviewResult,
+    status,
+    memo,
+  }
+
+  onCreate(newProposalHistory)
+}
 
   return (
     <div>

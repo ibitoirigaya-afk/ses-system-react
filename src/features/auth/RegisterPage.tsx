@@ -15,7 +15,12 @@ export default function RegisterPage({
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [passwordConfirm, setPasswordConfirm] = useState('')
   const [role, setRole] = useState<UserRole>('user')
+
+  const isValidEmail = (value: string) => {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)
+}
 
   const handleRegister = () => {
     if (name.trim() === '') {
@@ -28,6 +33,11 @@ export default function RegisterPage({
       return
     }
 
+    if (!isValidEmail(email)) {
+      alert('メールアドレスの形式が正しくありません。')
+      return
+    }
+
     if (password.trim() === '') {
       alert('パスワードを入力してください。')
       return
@@ -35,6 +45,16 @@ export default function RegisterPage({
 
     if (password.length < 4) {
       alert('パスワードは4文字以上で入力してください。')
+      return
+    }
+
+    if (passwordConfirm.trim() === '') {
+      alert('確認用パスワードを入力してください。')
+      return
+    }
+
+    if (password !== passwordConfirm) {
+      alert('パスワードと確認用パスワードが一致しません。')
       return
     }
 
@@ -110,6 +130,20 @@ export default function RegisterPage({
               placeholder="4文字以上で入力"
             />
           </div>
+
+          <div>
+  <label className="mb-1 block text-sm font-bold text-gray-700">
+    パスワード確認
+  </label>
+
+  <input
+    type="password"
+    value={passwordConfirm}
+    onChange={(event) => setPasswordConfirm(event.target.value)}
+    className="w-full rounded border border-gray-300 px-3 py-2"
+    placeholder="もう一度パスワードを入力"
+  />
+</div>
 
           <div>
             <label className="mb-1 block text-sm font-bold text-gray-700">
