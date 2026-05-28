@@ -3,16 +3,30 @@ import SkillForm, { type SkillFormValues } from './SkillForm'
 
 type Props = {
   skill: Skill
+  skills: Skill[]
   onUpdate: (skill: Skill) => void
   onCancel: () => void
 }
 
 export default function SkillEditPage({
   skill,
+  skills,
   onUpdate,
   onCancel,
 }: Props) {
   const handleSubmit = (values: SkillFormValues) => {
+    const exists = skills.some(
+      (existingSkill) =>
+        existingSkill.id !== skill.id &&
+        existingSkill.name.trim().toLowerCase() ===
+          values.name.trim().toLowerCase(),
+    )
+
+    if (exists) {
+      alert('同じスキル名がすでに登録されています。')
+      return
+    }
+
     const updatedSkill: Skill = {
       ...skill,
       name: values.name,

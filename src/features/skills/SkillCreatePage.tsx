@@ -2,20 +2,32 @@ import type { Skill } from './skillTypes'
 import SkillForm, { type SkillFormValues } from './SkillForm'
 
 type Props = {
+  skills: Skill[]
   onCreate: (skill: Skill) => void
   onCancel: () => void
 }
 
-export default function SkillCreatePage({ onCreate, onCancel }: Props) {
+export default function SkillCreatePage({ skills, onCreate, onCancel }: Props) {
   const handleSubmit = (values: SkillFormValues) => {
-    const newSkill: Skill = {
-      id: Date.now(),
-      name: values.name,
-      category: values.category,
-    }
+  const exists = skills.some(
+    (skill) =>
+      skill.name.trim().toLowerCase() ===
+      values.name.trim().toLowerCase(),
+  )
 
-    onCreate(newSkill)
+  if (exists) {
+    alert('同じスキル名がすでに登録されています。')
+    return
   }
+
+  const newSkill: Skill = {
+    id: Date.now(),
+    name: values.name,
+    category: values.category,
+  }
+
+  onCreate(newSkill)
+}
 
   return (
     <div>

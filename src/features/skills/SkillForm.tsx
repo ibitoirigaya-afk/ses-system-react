@@ -24,11 +24,21 @@ export default function SkillForm({
   const [category, setCategory] = useState(initialValues?.category ?? '')
 
   const handleSubmit = () => {
-    onSubmit({
-      name,
-      category,
-    })
+  if (name.trim() === '') {
+    alert('スキル名を入力してください。')
+    return
   }
+
+  if (category.trim() === '') {
+    alert('カテゴリを入力してください。')
+    return
+  }
+
+  onSubmit({
+    name,
+    category,
+  })
+}
 
   return (
     <div className="rounded-xl bg-white p-6 shadow">

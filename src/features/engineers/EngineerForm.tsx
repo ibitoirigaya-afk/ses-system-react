@@ -48,8 +48,8 @@ export default function EngineerForm({
     initialValues?.desiredUnitPrice ?? 0,
   )
   const [experienceYears, setExperienceYears] = useState(
-    initialValues?.experienceYears ?? 0,
-  )
+  initialValues?.experienceYears?.toString() ?? '',
+)
   const [availableDate, setAvailableDate] = useState(
     initialValues?.availableDate ?? '',
   )
@@ -80,22 +80,82 @@ export default function EngineerForm({
   }
 
   const handleSubmit = () => {
-    onSubmit({
-      name,
-      companyName,
-      age,
-      gender,
-      nearestStation,
-      desiredUnitPrice,
-      experienceYears,
-      availableDate,
-      desiredLocation,
-      desiredConditions,
-      careerSummary,
-      status,
-      skillIds,
-    })
+  if (name.trim() === '') {
+    alert('氏名を入力してください。')
+    return
   }
+
+  if (companyName.trim() === '') {
+    alert('所属会社を入力してください。')
+    return
+  }
+
+  if (age < 18) {
+    alert('年齢は18歳以上で入力してください。')
+    return
+  }
+
+  if (gender.trim() === '') {
+    alert('性別を入力してください。')
+    return
+  }
+
+  if (nearestStation.trim() === '') {
+    alert('最寄駅を入力してください。')
+    return
+  }
+
+  if (desiredUnitPrice <= 0) {
+    alert('希望単価は1円以上で入力してください。')
+    return
+  }
+
+  if (experienceYears.trim() === '') {
+  alert('経験年数を入力してください。')
+  return
+}
+
+if (Number(experienceYears) < 0) {
+  alert('経験年数は0年以上で入力してください。')
+  return
+}
+
+  if (availableDate.trim() === '') {
+    alert('稼働可能日を入力してください。')
+    return
+  }
+
+  if (desiredLocation.trim() === '') {
+    alert('希望勤務地を入力してください。')
+    return
+  }
+
+  if (careerSummary.trim() === '') {
+    alert('経歴概要を入力してください。')
+    return
+  }
+
+  if (skillIds.length === 0) {
+    alert('保有スキルを1つ以上選択してください。')
+    return
+  }
+
+  onSubmit({
+    name,
+    companyName,
+    age,
+    gender,
+    nearestStation,
+    desiredUnitPrice,
+    experienceYears: Number(experienceYears),
+    availableDate,
+    desiredLocation,
+    desiredConditions,
+    careerSummary,
+    status,
+    skillIds,
+  })
+}
 
   return (
     <div className="rounded-xl bg-white p-6 shadow">
@@ -190,13 +250,12 @@ export default function EngineerForm({
             </label>
 
             <input
-              type="number"
-              value={experienceYears}
-              onChange={(event) =>
-                setExperienceYears(Number(event.target.value))
-              }
-              className="w-full rounded border border-gray-300 px-3 py-2"
-            />
+  type="number"
+  value={experienceYears}
+  onChange={(event) => setExperienceYears(event.target.value)}
+  className="w-full rounded border border-gray-300 px-3 py-2"
+  placeholder="例：3"
+/>
           </div>
         </div>
 

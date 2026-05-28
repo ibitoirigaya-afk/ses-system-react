@@ -541,17 +541,19 @@ export default function App() {
 
       {currentPage === 'skills' && isCreatingSkill && (
         <SkillCreatePage
-          onCreate={handleCreateSkill}
-          onCancel={() => setIsCreatingSkill(false)}
-        />
+  skills={skills}
+  onCreate={handleCreateSkill}
+  onCancel={() => setIsCreatingSkill(false)}
+/>
       )}
 
       {currentPage === 'skills' && editingSkill !== null && (
         <SkillEditPage
-          skill={editingSkill}
-          onUpdate={handleUpdateSkill}
-          onCancel={() => setEditingSkill(null)}
-        />
+  skill={editingSkill}
+  skills={skills}
+  onUpdate={handleUpdateSkill}
+  onCancel={() => setEditingSkill(null)}
+/>
       )}
 
       {currentPage === 'proposals' &&

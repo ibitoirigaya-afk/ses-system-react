@@ -52,15 +52,40 @@ export default function ProjectForm({
   }
 
   const handleSubmit = () => {
-    onSubmit({
-      title,
-      description,
-      location,
-      unitPrice,
-      status,
-      skillIds,
-    })
+  if (title.trim() === '') {
+    alert('案件名を入力してください。')
+    return
   }
+
+  if (description.trim() === '') {
+    alert('案件概要を入力してください。')
+    return
+  }
+
+  if (location.trim() === '') {
+    alert('勤務地を入力してください。')
+    return
+  }
+
+  if (unitPrice <= 0) {
+    alert('単価は1円以上で入力してください。')
+    return
+  }
+
+  if (skillIds.length === 0) {
+    alert('必要スキルを1つ以上選択してください。')
+    return
+  }
+
+  onSubmit({
+    title,
+    description,
+    location,
+    unitPrice,
+    status,
+    skillIds,
+  })
+}
 
   return (
     <div className="rounded-xl bg-white p-6 shadow">
