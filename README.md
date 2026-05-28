@@ -1,73 +1,219 @@
-# React + TypeScript + Vite
+# SES/BP営業管理システム DEMO
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React + TypeScript + Vite + Tailwind CSS で作成した、SES/BP営業向けの営業管理システムDEMOです。
 
-Currently, two official plugins are available:
+案件管理、要員管理、スキル管理、マッチング、提案履歴、稼働実績、ロール別画面表示などを実装しています。
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## 使用技術
 
-## React Compiler
+- React
+- TypeScript
+- Vite
+- Tailwind CSS
+- localStorage
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## 主な機能
 
-## Expanding the ESLint configuration
+### 認証機能
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- ログイン
+- 新規登録
+- ログアウト
+- パスワード入力
+- パスワード確認
+- メールアドレス形式チェック
+- ログイン状態の保持
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+※ DEMO版のため、実際のAPI認証やDB保存は未実装です。
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+### ロール別機能
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+このアプリでは、以下の3種類のロールを用意しています。
+
+#### 管理者
+
+- 案件管理
+- 要員管理
+- スキル管理
+- 提案履歴管理
+- 稼働実績管理
+- ダッシュボード確認
+
+#### 要員担当
+
+- 案件一覧の閲覧
+- 自分が登録した要員の管理
+- 自分の要員に関係する提案履歴の確認
+
+#### 企業担当
+
+- 自社案件の管理
+- 自社案件に対するマッチング
+- 提案履歴の確認
+
+## 実装済み機能
+
+### 案件管理
+
+- 案件一覧
+- 案件詳細
+- 案件登録
+- 案件編集
+- 案件削除
+- 案件検索
+- 必要スキル選択
+- 入力チェック
+
+### 要員管理
+
+- 要員一覧
+- 要員詳細
+- 要員登録
+- 要員編集
+- 要員削除
+- 保有スキル選択
+- 入力チェック
+
+### スキル管理
+
+- スキル一覧
+- スキル登録
+- スキル編集
+- スキル削除
+- 同名スキルの重複登録防止
+- 入力チェック
+
+### マッチング
+
+- 案件に必要なスキルと要員の保有スキルを比較
+- マッチ率を表示
+- マッチ率が高い順に表示
+- マッチング結果から提案履歴を作成
+
+### 提案履歴管理
+
+- 提案履歴一覧
+- 提案履歴詳細
+- 提案履歴登録
+- 提案履歴編集
+- 提案履歴削除
+- 新着順 / 古い順 / 面談日が近い順の並び替え
+- ステータス絞り込み
+- 入力チェック
+
+### 稼働実績管理
+
+- 稼働実績一覧
+- 稼働実績登録
+- 稼働実績編集
+- 稼働実績削除
+- 粗利自動計算
+- 入力チェック
+
+### ダッシュボード
+
+ロールごとに表示内容を切り替えています。
+
+- 管理者TOP
+- 要員担当TOP
+- 企業担当TOP
+
+## DEMOログイン情報
+
+以下のユーザーでログインできます。
+
+| ロール | メールアドレス | パスワード |
+|---|---|---|
+| 管理者 | admin@example.com | password |
+| 要員担当 | user@example.com | password |
+| 企業担当 | company@example.com | password |
+
+## 起動方法
+
+### 1. リポジトリをクローン
+
+```bash
+git clone リポジトリURL
+
+### 2. プロジェクトフォルダへ移動
+
+```bash
+cd ses-system-react
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### 3. パッケージをインストール
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
 ```
+
+### 4. 開発サーバーを起動
+
+```bash
+npm run dev
+```
+
+ブラウザで表示されたURLを開きます。
+
+例：
+
+```bash
+http://localhost:5173
+```
+
+## データ保存について
+
+このDEMO版では、データ保存に `localStorage` を使用しています。
+
+保存対象：
+
+- ユーザー
+- 案件
+- 要員
+- スキル
+- 提案履歴
+- 稼働実績
+- ログイン中ユーザー
+
+そのため、ブラウザをリロードしてもデータは残ります。
+
+ただし、別ブラウザや別端末では共有されません。
+
+## 現在の保存キー
+
+```txt
+ses-users
+ses-current-user-id
+ses-projects
+ses-engineers
+ses-skills
+ses-proposal-histories
+ses-work-records
+```
+
+## 今後の改善予定
+
+- React Router の導入
+- Laravel API または Node.js API との連携
+- DB保存対応
+- 本格的な認証機能
+- パスワードハッシュ化
+- サーバー側バリデーション
+- 詳細画面のデザイン改善
+- 稼働実績の月別集計
+- CSV出力
+- テスト追加
+
+## 注意点
+
+このアプリは学習・DEMO用途で作成しています。
+
+本番利用する場合は、以下の対応が必要です。
+
+- API連携
+- DB保存
+- 認証認可の強化
+- パスワードの安全な管理
+- バリデーションのサーバー側実装
+- エラーハンドリング
+- セキュリティ対策
