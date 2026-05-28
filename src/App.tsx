@@ -339,32 +339,121 @@ export default function App() {
     setCurrentPage('workRecords')
   }
 
-  const handleCreateProposalHistory = (proposalHistory: ProposalHistory) => {
-    setProposalHistories((prev) => [proposalHistory, ...prev])
-
-    setCurrentPage('proposals')
-    setIsCreatingProposalHistory(false)
-    setSelectedProjectId(null)
-    setCreatingProposal(null)
-    setSelectedProposalHistory(null)
-    setEditingProposalHistory(null)
-  }
-
-  const handleUpdateProposalHistory = (
-    updatedProposalHistory: ProposalHistory,
-  ) => {
-    setProposalHistories((prev) =>
-      prev.map((proposalHistory) =>
-        proposalHistory.id === updatedProposalHistory.id
-          ? updatedProposalHistory
-          : proposalHistory,
+  const syncStatusesByProposalHistory = (
+  proposalHistory: ProposalHistory,
+) => {
+  if (
+    proposalHistory.status === '提案中' ||
+    proposalHistory.status === '面談調整中' ||
+    proposalHistory.status === '面談予定' ||
+    proposalHistory.status === '面談済み'
+  ) {
+    setProjects((prev) =>
+      prev.map((project) =>
+        project.id === proposalHistory.projectId
+          ? {
+              ...project,
+              status: '提案中',
+            }
+          : project,
       ),
     )
 
-    setEditingProposalHistory(null)
-    setSelectedProposalHistory(null)
-    setCurrentPage('proposals')
+    setEngineers((prev) =>
+      prev.map((engineer) =>
+        engineer.id === proposalHistory.engineerId
+          ? {
+              ...engineer,
+              status: '提案中',
+            }
+          : engineer,
+      ),
+    )
+
+    return
   }
+
+  if (proposalHistory.status === '成約') {
+    setProjects((prev) =>
+      prev.map((project) =>
+        project.id === proposalHistory.projectId
+          ? {
+              ...project,
+              status: '成約',
+            }
+          : project,
+      ),
+    )
+
+    setEngineers((prev) =>
+      prev.map((engineer) =>
+        engineer.id === proposalHistory.engineerId
+          ? {
+              ...engineer,
+              status: '稼働中',
+            }
+          : engineer,
+      ),
+    )
+
+    return
+  }
+
+  if (proposalHistory.status === '見送り') {
+    setProjects((prev) =>
+      prev.map((project) =>
+        project.id === proposalHistory.projectId
+          ? {
+              ...project,
+              status: '募集中',
+            }
+          : project,
+      ),
+    )
+
+    setEngineers((prev) =>
+      prev.map((engineer) =>
+        engineer.id === proposalHistory.engineerId
+          ? {
+              ...engineer,
+              status: '稼働可能',
+            }
+          : engineer,
+      ),
+    )
+  }
+}
+
+  const handleCreateProposalHistory = (proposalHistory: ProposalHistory) => {
+  setProposalHistories((prev) => [proposalHistory, ...prev])
+
+  syncStatusesByProposalHistory(proposalHistory)
+
+  setCurrentPage('proposals')
+  setIsCreatingProposalHistory(false)
+  setSelectedProjectId(null)
+  setCreatingProposal(null)
+  setSelectedProposalHistory(null)
+  setEditingProposalHistory(null)
+}
+
+  const handleUpdateProposalHistory = (
+  updatedProposalHistory: ProposalHistory,
+) => {
+  setProposalHistories((prev) =>
+    prev.map((proposalHistory) =>
+      proposalHistory.id === updatedProposalHistory.id
+        ? updatedProposalHistory
+        : proposalHistory,
+    ),
+  )
+
+  syncStatusesByProposalHistory(updatedProposalHistory)
+
+  setEditingProposalHistory(null)
+  setSelectedProposalHistory(null)
+  setCurrentPage('proposals')
+}
 
   const handleDeleteProposalHistory = (proposalHistoryId: number) => {
     setProposalHistories((prev) =>
