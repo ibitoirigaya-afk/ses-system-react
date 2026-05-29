@@ -36,6 +36,17 @@ import { mockSkills } from './data/mockSkills'
 import { mockProposalHistories } from './data/mockProposalHistories'
 import { mockWorkRecords } from './data/mockWorkRecords'
 
+import {
+  loadFromStorage,
+  removeFromStorage,
+  saveToStorage,
+} from './utils/storage'
+import { STORAGE_KEYS } from './constants/storageKeys'
+import {
+  getEngineerStatusByProposalStatus,
+  getProjectStatusByProposalStatus,
+} from './utils/proposalStatusSync'
+
 type Page =
   | 'top'
   | 'projects'
@@ -51,37 +62,23 @@ type CreatingProposal = {
   engineerId: number
 }
 
-function loadFromStorage<T>(key: string, fallback: T): T {
-  const saved = localStorage.getItem(key)
-
-  if (!saved) {
-    return fallback
-  }
-
-  try {
-    return JSON.parse(saved) as T
-  } catch {
-    return fallback
-  }
-}
-
 export default function App() {
   const [authMode, setAuthMode] = useState<AuthMode>('login')
 
   const [users, setUsers] = useState<User[]>(() =>
-    loadFromStorage('ses-users', mockUsers),
+    loadFromStorage(STORAGE_KEYS.users, mockUsers),
   )
 
   const [currentUserId, setCurrentUserId] = useState<number | null>(() =>
-    loadFromStorage('ses-current-user-id', null),
+    loadFromStorage(STORAGE_KEYS.currentUserId, null),
   )
 
   const [currentPage, setCurrentPage] = useState<Page>(() =>
-  loadFromStorage('ses-current-page', 'top'),
-)
+    loadFromStorage(STORAGE_KEYS.currentPage, 'top'),
+  )
 
   const [projects, setProjects] = useState<Project[]>(() =>
-    loadFromStorage('ses-projects', mockProjects),
+    loadFromStorage(STORAGE_KEYS.projects, mockProjects),
   )
 
   const [isCreatingProject, setIsCreatingProject] = useState(false)
@@ -92,7 +89,7 @@ export default function App() {
   )
 
   const [engineers, setEngineers] = useState<Engineer[]>(() =>
-    loadFromStorage('ses-engineers', mockEngineers),
+    loadFromStorage(STORAGE_KEYS.engineers, mockEngineers),
   )
 
   const [isCreatingEngineer, setIsCreatingEngineer] = useState(false)
@@ -102,14 +99,14 @@ export default function App() {
   const [editingEngineer, setEditingEngineer] = useState<Engineer | null>(null)
 
   const [skills, setSkills] = useState<Skill[]>(() =>
-    loadFromStorage('ses-skills', mockSkills),
+    loadFromStorage(STORAGE_KEYS.skills, mockSkills),
   )
 
   const [isCreatingSkill, setIsCreatingSkill] = useState(false)
   const [editingSkill, setEditingSkill] = useState<Skill | null>(null)
 
   const [workRecords, setWorkRecords] = useState<WorkRecord[]>(() =>
-    loadFromStorage('ses-work-records', mockWorkRecords),
+    loadFromStorage(STORAGE_KEYS.workRecords, mockWorkRecords),
   )
 
   const [isCreatingWorkRecord, setIsCreatingWorkRecord] = useState(false)
@@ -120,7 +117,7 @@ export default function App() {
     useState<CreatingProposal | null>(null)
 
   const [proposalHistories, setProposalHistories] = useState<ProposalHistory[]>(
-    () => loadFromStorage('ses-proposal-histories', mockProposalHistories),
+    () => loadFromStorage(STORAGE_KEYS.proposalHistories, mockProposalHistories),
   )
 
   const [selectedProposalHistory, setSelectedProposalHistory] =
@@ -138,44 +135,41 @@ export default function App() {
       : users.find((user) => user.id === currentUserId)
 
   useEffect(() => {
-    localStorage.setItem('ses-users', JSON.stringify(users))
-  }, [users])
+  saveToStorage(STORAGE_KEYS.users, users)
+}, [users])
 
   useEffect(() => {
-  localStorage.setItem('ses-current-page', JSON.stringify(currentPage))
+  saveToStorage('ses-current-page', currentPage)
 }, [currentPage])
 
   useEffect(() => {
     if (currentUserId === null) {
-      localStorage.removeItem('ses-current-user-id')
+      removeFromStorage('ses-current-user-id')
       return
     }
 
-    localStorage.setItem('ses-current-user-id', JSON.stringify(currentUserId))
+    saveToStorage(STORAGE_KEYS.currentUserId, currentUserId)
   }, [currentUserId])
 
   useEffect(() => {
-    localStorage.setItem('ses-projects', JSON.stringify(projects))
-  }, [projects])
+  saveToStorage('ses-projects', projects)
+}, [projects])
 
   useEffect(() => {
-    localStorage.setItem('ses-engineers', JSON.stringify(engineers))
-  }, [engineers])
+  saveToStorage('ses-engineers', engineers)
+}, [engineers])
 
   useEffect(() => {
-    localStorage.setItem('ses-skills', JSON.stringify(skills))
-  }, [skills])
+  saveToStorage('ses-skills', skills)
+}, [skills])
 
   useEffect(() => {
-    localStorage.setItem('ses-work-records', JSON.stringify(workRecords))
-  }, [workRecords])
+  saveToStorage('ses-work-records', workRecords)
+}, [workRecords])
 
   useEffect(() => {
-    localStorage.setItem(
-      'ses-proposal-histories',
-      JSON.stringify(proposalHistories),
-    )
-  }, [proposalHistories])
+  saveToStorage('ses-proposal-histories', proposalHistories)
+}, [proposalHistories])
 
   const resetPageState = () => {
     setIsCreatingProject(false)
@@ -429,86 +423,35 @@ const handleRestoreWorkRecord = (workRecordId: number) => {
   const syncStatusesByProposalHistory = (
   proposalHistory: ProposalHistory,
 ) => {
-  if (
-    proposalHistory.status === '提案中' ||
-    proposalHistory.status === '面談調整中' ||
-    proposalHistory.status === '面談予定' ||
-    proposalHistory.status === '面談済み'
-  ) {
-    setProjects((prev) =>
-      prev.map((project) =>
-        project.id === proposalHistory.projectId
-          ? {
-              ...project,
-              status: '提案中',
-            }
-          : project,
-      ),
-    )
+  const nextProjectStatus = getProjectStatusByProposalStatus(
+    proposalHistory.status,
+  )
 
-    setEngineers((prev) =>
-      prev.map((engineer) =>
-        engineer.id === proposalHistory.engineerId
-          ? {
-              ...engineer,
-              status: '提案中',
-            }
-          : engineer,
-      ),
-    )
+  const nextEngineerStatus = getEngineerStatusByProposalStatus(
+    proposalHistory.status,
+  )
 
-    return
-  }
+  setProjects((prev) =>
+    prev.map((project) =>
+      project.id === proposalHistory.projectId
+        ? {
+            ...project,
+            status: nextProjectStatus,
+          }
+        : project,
+    ),
+  )
 
-  if (proposalHistory.status === '成約') {
-    setProjects((prev) =>
-      prev.map((project) =>
-        project.id === proposalHistory.projectId
-          ? {
-              ...project,
-              status: '成約',
-            }
-          : project,
-      ),
-    )
-
-    setEngineers((prev) =>
-      prev.map((engineer) =>
-        engineer.id === proposalHistory.engineerId
-          ? {
-              ...engineer,
-              status: '稼働中',
-            }
-          : engineer,
-      ),
-    )
-
-    return
-  }
-
-  if (proposalHistory.status === '見送り') {
-    setProjects((prev) =>
-      prev.map((project) =>
-        project.id === proposalHistory.projectId
-          ? {
-              ...project,
-              status: '募集中',
-            }
-          : project,
-      ),
-    )
-
-    setEngineers((prev) =>
-      prev.map((engineer) =>
-        engineer.id === proposalHistory.engineerId
-          ? {
-              ...engineer,
-              status: '稼働可能',
-            }
-          : engineer,
-      ),
-    )
-  }
+  setEngineers((prev) =>
+    prev.map((engineer) =>
+      engineer.id === proposalHistory.engineerId
+        ? {
+            ...engineer,
+            status: nextEngineerStatus,
+          }
+        : engineer,
+    ),
+  )
 }
 
   const handleCreateProposalHistory = (proposalHistory: ProposalHistory) => {
