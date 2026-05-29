@@ -15,4 +15,5 @@ export type ProposalHistory = {
   interviewResult: string
   status: ProposalStatus
   memo: string
+  deletedAt?: string | null
 }

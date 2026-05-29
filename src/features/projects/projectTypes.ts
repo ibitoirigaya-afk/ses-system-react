@@ -11,4 +11,5 @@ export type Project = {
   unitPrice: number
   status: ProjectStatus
   skills: Skill[]
+  deletedAt?: string | null
 }

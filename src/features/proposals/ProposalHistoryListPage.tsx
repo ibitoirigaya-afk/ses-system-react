@@ -26,6 +26,7 @@ type Props = {
   onShowDetail: (proposalHistory: ProposalHistory) => void
   onEdit: (proposalHistory: ProposalHistory) => void
   onDelete: (proposalHistoryId: number) => void
+  onRestore: (proposalHistoryId: number) => void
 }
 
 export default function ProposalHistoryListPage({
@@ -36,11 +37,12 @@ export default function ProposalHistoryListPage({
   onShowDetail,
   onEdit,
   onDelete,
+  onRestore,
   onOpenCreate,
 }: Props) {
   const [sortType, setSortType] = useState<SortType>('newest')
-
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all')
+  const [showDeleted, setShowDeleted] = useState(false)
 
   const visibleProposalHistories = proposalHistories
   .filter((proposalHistory) =>
@@ -51,6 +53,13 @@ export default function ProposalHistoryListPage({
       engineers,
     ),
   )
+  .filter((proposalHistory) => {
+    if (showDeleted) {
+      return Boolean(proposalHistory.deletedAt)
+    }
+
+    return !proposalHistory.deletedAt
+  })
   .filter((proposalHistory) => {
     if (statusFilter === 'all') {
       return true
@@ -97,12 +106,27 @@ export default function ProposalHistoryListPage({
           </p>
         </div>
 
-        <button
-          onClick={onOpenCreate}
-          className="rounded bg-blue-600 px-4 py-2 text-sm font-bold text-white"
-        >
-          新規提案登録
-        </button>
+        <div className="flex gap-2">
+  <button
+    onClick={() => setShowDeleted((prev) => !prev)}
+    className={
+      showDeleted
+        ? 'rounded bg-gray-800 px-4 py-2 text-sm font-bold text-white'
+        : 'rounded bg-gray-100 px-4 py-2 text-sm font-bold text-gray-700'
+    }
+  >
+    {showDeleted ? '通常履歴を表示' : '削除済みを表示'}
+  </button>
+
+  {!showDeleted && (
+    <button
+      onClick={onOpenCreate}
+      className="rounded bg-blue-600 px-4 py-2 text-sm font-bold text-white"
+    >
+      新規提案登録
+    </button>
+  )}
+</div>
       </div>
 
       <div className="mb-4 rounded-xl bg-white p-4 shadow">
@@ -212,55 +236,80 @@ export default function ProposalHistoryListPage({
                   </td>
 
                   <td className="px-4 py-4 text-sm text-gray-600">
-                    {proposalHistory.memo || 'メモなし'}
-                  </td>
+  {showDeleted && proposalHistory.deletedAt ? (
+    <span className="font-bold text-red-600">
+      削除日時：{new Date(proposalHistory.deletedAt).toLocaleString()}
+    </span>
+  ) : (
+    proposalHistory.memo || 'メモなし'
+  )}
+</td>
 
                   <td className="px-4 py-4">
                     <div className="flex gap-2">
-                      <button
-                        onClick={() => onShowDetail(proposalHistory)}
-                        className="rounded bg-gray-100 px-3 py-1 text-xs font-bold text-gray-700"
-                      >
-                        詳細
-                      </button>
+  {showDeleted ? (
+    <button
+      onClick={() => {
+        const ok = window.confirm('この提案履歴を復元しますか？')
 
-                      <button
-                        onClick={() => onEdit(proposalHistory)}
-                        className="rounded bg-blue-100 px-3 py-1 text-xs font-bold text-blue-700"
-                      >
-                        編集
-                      </button>
+        if (ok) {
+          onRestore(proposalHistory.id)
+        }
+      }}
+      className="rounded bg-green-100 px-3 py-1 text-xs font-bold text-green-700"
+    >
+      復元
+    </button>
+  ) : (
+    <>
+      <button
+        onClick={() => onShowDetail(proposalHistory)}
+        className="rounded bg-gray-100 px-3 py-1 text-xs font-bold text-gray-700"
+      >
+        詳細
+      </button>
 
-                      <button
-                        onClick={() => {
-                          const ok = window.confirm(
-                            'この提案履歴を削除しますか？',
-                          )
+      <button
+        onClick={() => onEdit(proposalHistory)}
+        className="rounded bg-blue-100 px-3 py-1 text-xs font-bold text-blue-700"
+      >
+        編集
+      </button>
 
-                          if (ok) {
-                            onDelete(proposalHistory.id)
-                          }
-                        }}
-                        className="rounded bg-red-100 px-3 py-1 text-xs font-bold text-red-700"
-                      >
-                        削除
-                      </button>
-                    </div>
+      <button
+        onClick={() => {
+          const ok = window.confirm(
+            'この提案履歴を削除済みに移動しますか？',
+          )
+
+          if (ok) {
+            onDelete(proposalHistory.id)
+          }
+        }}
+        className="rounded bg-red-100 px-3 py-1 text-xs font-bold text-red-700"
+      >
+        削除
+      </button>
+    </>
+  )}
+</div>
                   </td>
                 </tr>
               )
             })}
 
             {visibleProposalHistories.length === 0 && (
-              <tr>
-                <td
-                  colSpan={7}
-                  className="px-4 py-8 text-center text-sm text-gray-500"
-                >
-                  表示できる提案履歴がありません。
-                </td>
-              </tr>
-            )}
+  <tr>
+    <td
+      colSpan={7}
+      className="px-4 py-8 text-center text-sm text-gray-500"
+    >
+      {showDeleted
+        ? '削除済みの提案履歴はありません。'
+        : '表示できる提案履歴がありません。'}
+    </td>
+  </tr>
+)}
           </tbody>
         </table>
       </div>

@@ -16,6 +16,7 @@ type Props = {
   onOpenEdit: (project: Project) => void
   onOpenMatching: (projectId: number) => void
   onDelete: (projectId: number) => void
+  onRestore: (projectId: number) => void
 }
 
 export default function ProjectListPage({
@@ -26,31 +27,40 @@ export default function ProjectListPage({
   onOpenEdit,
   onOpenMatching,
   onDelete,
+  onRestore,
 }: Props) {
   const [searchText, setSearchText] = useState('')
+  const [showDeleted, setShowDeleted] = useState(false)
 
   const visibleProjects = projects
-    .filter((project) => canViewProject(currentUser, project))
-    .filter((project) => {
-      const keyword = searchText.trim().toLowerCase()
+  .filter((project) => canViewProject(currentUser, project))
+  .filter((project) => {
+    if (showDeleted) {
+      return Boolean(project.deletedAt)
+    }
 
-      if (keyword === '') {
-        return true
-      }
+    return !project.deletedAt
+  })
+  .filter((project) => {
+    const keyword = searchText.trim().toLowerCase()
 
-      const skillNames = project.skills
-        .map((skill) => skill.name)
-        .join(' ')
-        .toLowerCase()
+    if (keyword === '') {
+      return true
+    }
 
-      return (
-        project.title.toLowerCase().includes(keyword) ||
-        project.description.toLowerCase().includes(keyword) ||
-        project.location.toLowerCase().includes(keyword) ||
-        project.status.toLowerCase().includes(keyword) ||
-        skillNames.includes(keyword)
-      )
-    })
+    const skillNames = project.skills
+      .map((skill) => skill.name)
+      .join(' ')
+      .toLowerCase()
+
+    return (
+      project.title.toLowerCase().includes(keyword) ||
+      project.description.toLowerCase().includes(keyword) ||
+      project.location.toLowerCase().includes(keyword) ||
+      project.status.toLowerCase().includes(keyword) ||
+      skillNames.includes(keyword)
+    )
+  })
 
   return (
     <div>
@@ -74,21 +84,36 @@ export default function ProjectListPage({
       </div>
 
       <div className="mb-4 rounded-xl bg-white p-4 shadow">
-        <label className="mb-2 block text-sm font-bold text-gray-700">
-          案件検索
-        </label>
+  <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+    <div className="flex-1">
+      <label className="mb-2 block text-sm font-bold text-gray-700">
+        案件検索
+      </label>
 
-        <input
-          value={searchText}
-          onChange={(event) => setSearchText(event.target.value)}
-          className="w-full rounded border border-gray-300 px-3 py-2"
-          placeholder="案件名・概要・勤務地・ステータス・スキルで検索"
-        />
+      <input
+        value={searchText}
+        onChange={(event) => setSearchText(event.target.value)}
+        className="w-full rounded border border-gray-300 px-3 py-2"
+        placeholder="案件名・概要・勤務地・ステータス・スキルで検索"
+      />
+    </div>
 
-        <p className="mt-2 text-xs text-gray-500">
-          表示中：{visibleProjects.length}件
-        </p>
-      </div>
+    <button
+      onClick={() => setShowDeleted((prev) => !prev)}
+      className={
+        showDeleted
+          ? 'rounded bg-gray-800 px-4 py-2 text-sm font-bold text-white'
+          : 'rounded bg-gray-100 px-4 py-2 text-sm font-bold text-gray-700'
+      }
+    >
+      {showDeleted ? '通常案件を表示' : '削除済みを表示'}
+    </button>
+  </div>
+
+  <p className="mt-3 text-xs text-gray-500">
+    表示中：{visibleProjects.length}件
+  </p>
+</div>
 
       <div className="overflow-hidden rounded-xl bg-white shadow">
         <table className="w-full border-collapse">
@@ -154,63 +179,82 @@ export default function ProjectListPage({
                 </td>
 
                 <td className="px-4 py-4">
-                  <div className="flex flex-wrap gap-2">
-                    <button
-                      onClick={() => onOpenDetail(project)}
-                      className="rounded bg-gray-100 px-3 py-1 text-xs font-bold text-gray-700"
-                    >
-                      詳細
-                    </button>
+  <div className="flex flex-wrap gap-2">
+    {showDeleted ? (
+      <button
+        onClick={() => {
+          const ok = window.confirm('この案件を復元しますか？')
 
-                    {canEditProject(currentUser, project) && (
-                      <>
-                        <button
-                          onClick={() => onOpenEdit(project)}
-                          className="rounded bg-blue-100 px-3 py-1 text-xs font-bold text-blue-700"
-                        >
-                          編集
-                        </button>
+          if (ok) {
+            onRestore(project.id)
+          }
+        }}
+        className="rounded bg-green-100 px-3 py-1 text-xs font-bold text-green-700"
+      >
+        復元
+      </button>
+    ) : (
+      <>
+        <button
+          onClick={() => onOpenDetail(project)}
+          className="rounded bg-gray-100 px-3 py-1 text-xs font-bold text-gray-700"
+        >
+          詳細
+        </button>
 
-                        <button
-                          onClick={() => {
-                            const ok = window.confirm(
-                              'この案件を削除しますか？',
-                            )
+        {canEditProject(currentUser, project) && (
+          <>
+            <button
+              onClick={() => onOpenEdit(project)}
+              className="rounded bg-blue-100 px-3 py-1 text-xs font-bold text-blue-700"
+            >
+              編集
+            </button>
 
-                            if (ok) {
-                              onDelete(project.id)
-                            }
-                          }}
-                          className="rounded bg-red-100 px-3 py-1 text-xs font-bold text-red-700"
-                        >
-                          削除
-                        </button>
-                      </>
-                    )}
+            <button
+              onClick={() => {
+                const ok = window.confirm(
+                  'この案件を削除済みに移動しますか？',
+                )
 
-                    {canUseMatching(currentUser, project) && (
-                      <button
-                        onClick={() => onOpenMatching(project.id)}
-                        className="rounded bg-purple-100 px-3 py-1 text-xs font-bold text-purple-700"
-                      >
-                        マッチング
-                      </button>
-                    )}
-                  </div>
-                </td>
+                if (ok) {
+                  onDelete(project.id)
+                }
+              }}
+              className="rounded bg-red-100 px-3 py-1 text-xs font-bold text-red-700"
+            >
+              削除
+            </button>
+          </>
+        )}
+
+        {canUseMatching(currentUser, project) && (
+          <button
+            onClick={() => onOpenMatching(project.id)}
+            className="rounded bg-purple-100 px-3 py-1 text-xs font-bold text-purple-700"
+          >
+            マッチング
+          </button>
+        )}
+      </>
+    )}
+  </div>
+</td>
               </tr>
             ))}
 
             {visibleProjects.length === 0 && (
-              <tr>
-                <td
-                  colSpan={6}
-                  className="px-4 py-8 text-center text-sm text-gray-500"
-                >
-                  条件に一致する案件がありません。
-                </td>
-              </tr>
-            )}
+  <tr>
+    <td
+      colSpan={6}
+      className="px-4 py-8 text-center text-sm text-gray-500"
+    >
+      {showDeleted
+        ? '削除済みの案件はありません。'
+        : '条件に一致する案件がありません。'}
+    </td>
+  </tr>
+)}
           </tbody>
         </table>
       </div>

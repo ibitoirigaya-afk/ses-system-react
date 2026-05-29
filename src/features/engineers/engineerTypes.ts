@@ -18,4 +18,5 @@ export type Engineer = {
   careerSummary: string
   status: EngineerStatus
   skills: Skill[]
+  deletedAt?: string | null
 }

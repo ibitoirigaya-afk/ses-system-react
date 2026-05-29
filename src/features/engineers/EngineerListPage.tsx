@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import type { User } from '../auth/authTypes'
 import type { Engineer } from './engineerTypes'
 import { canEditEngineer, canViewEngineer } from '../../utils/permissions'
@@ -10,6 +11,7 @@ type Props = {
   onOpenDetail: (engineer: Engineer) => void
   onOpenEdit: (engineer: Engineer) => void
   onDelete: (engineerId: number) => void
+  onRestore: (engineerId: number) => void
 }
 
 export default function EngineerListPage({
@@ -19,10 +21,19 @@ export default function EngineerListPage({
   onOpenDetail,
   onOpenEdit,
   onDelete,
+  onRestore,
 }: Props) {
-  const visibleEngineers = engineers.filter((engineer) =>
-    canViewEngineer(currentUser, engineer),
-  )
+  const [showDeleted, setShowDeleted] = useState(false)
+
+  const visibleEngineers = engineers
+    .filter((engineer) => canViewEngineer(currentUser, engineer))
+    .filter((engineer) => {
+      if (showDeleted) {
+        return Boolean(engineer.deletedAt)
+      }
+
+      return !engineer.deletedAt
+    })
 
   if (currentUser.role === 'company') {
     return (
@@ -40,18 +51,34 @@ export default function EngineerListPage({
       <div className="mb-6 flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold text-gray-900">要員一覧</h2>
+
           <p className="mt-1 text-sm text-gray-500">
             登録されている要員を確認できます。
           </p>
         </div>
 
         {(currentUser.role === 'admin' || currentUser.role === 'user') && (
-          <button
-            onClick={onOpenCreate}
-            className="rounded bg-blue-600 px-4 py-2 text-sm font-bold text-white"
-          >
-            新規要員登録
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setShowDeleted((prev) => !prev)}
+              className={
+                showDeleted
+                  ? 'rounded bg-gray-800 px-4 py-2 text-sm font-bold text-white'
+                  : 'rounded bg-gray-100 px-4 py-2 text-sm font-bold text-gray-700'
+              }
+            >
+              {showDeleted ? '通常要員を表示' : '削除済みを表示'}
+            </button>
+
+            {!showDeleted && (
+              <button
+                onClick={onOpenCreate}
+                className="rounded bg-blue-600 px-4 py-2 text-sm font-bold text-white"
+              >
+                新規要員登録
+              </button>
+            )}
+          </div>
         )}
       </div>
 
@@ -83,6 +110,12 @@ export default function EngineerListPage({
                 <p className="mt-1 text-sm text-gray-700">
                   稼働可能日：{engineer.availableDate}
                 </p>
+
+                {showDeleted && engineer.deletedAt && (
+                  <p className="mt-2 text-xs font-bold text-red-600">
+                    削除日時：{new Date(engineer.deletedAt).toLocaleString()}
+                  </p>
+                )}
               </div>
 
               <StatusBadge status={engineer.status} type="engineer" />
@@ -108,34 +141,53 @@ export default function EngineerListPage({
             </p>
 
             <div className="mt-4 flex gap-2">
-              <button
-                onClick={() => onOpenDetail(engineer)}
-                className="rounded bg-gray-100 px-3 py-1 text-xs font-bold text-gray-700"
-              >
-                詳細
-              </button>
+              {showDeleted ? (
+                <button
+                  onClick={() => {
+                    const ok = window.confirm('この要員を復元しますか？')
 
-              {canEditEngineer(currentUser, engineer) && (
+                    if (ok) {
+                      onRestore(engineer.id)
+                    }
+                  }}
+                  className="rounded bg-green-100 px-3 py-1 text-xs font-bold text-green-700"
+                >
+                  復元
+                </button>
+              ) : (
                 <>
                   <button
-                    onClick={() => onOpenEdit(engineer)}
-                    className="rounded bg-blue-100 px-3 py-1 text-xs font-bold text-blue-700"
+                    onClick={() => onOpenDetail(engineer)}
+                    className="rounded bg-gray-100 px-3 py-1 text-xs font-bold text-gray-700"
                   >
-                    編集
+                    詳細
                   </button>
 
-                  <button
-                    onClick={() => {
-                      const ok = window.confirm('この要員を削除しますか？')
+                  {canEditEngineer(currentUser, engineer) && (
+                    <>
+                      <button
+                        onClick={() => onOpenEdit(engineer)}
+                        className="rounded bg-blue-100 px-3 py-1 text-xs font-bold text-blue-700"
+                      >
+                        編集
+                      </button>
 
-                      if (ok) {
-                        onDelete(engineer.id)
-                      }
-                    }}
-                    className="rounded bg-red-100 px-3 py-1 text-xs font-bold text-red-700"
-                  >
-                    削除
-                  </button>
+                      <button
+                        onClick={() => {
+                          const ok = window.confirm(
+                            'この要員を削除済みに移動しますか？',
+                          )
+
+                          if (ok) {
+                            onDelete(engineer.id)
+                          }
+                        }}
+                        className="rounded bg-red-100 px-3 py-1 text-xs font-bold text-red-700"
+                      >
+                        削除
+                      </button>
+                    </>
+                  )}
                 </>
               )}
             </div>
@@ -144,7 +196,9 @@ export default function EngineerListPage({
 
         {visibleEngineers.length === 0 && (
           <div className="rounded-xl bg-white p-6 text-center text-sm text-gray-500 shadow">
-            表示できる要員がありません。
+            {showDeleted
+              ? '削除済みの要員はありません。'
+              : '表示できる要員がありません。'}
           </div>
         )}
       </div>

@@ -8,4 +8,5 @@ export type WorkRecord = {
   paymentAmount: number
   grossProfit: number
   memo: string
+  deletedAt?: string | null
 }

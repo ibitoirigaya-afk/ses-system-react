@@ -76,7 +76,9 @@ export default function App() {
     loadFromStorage('ses-current-user-id', null),
   )
 
-  const [currentPage, setCurrentPage] = useState<Page>('top')
+  const [currentPage, setCurrentPage] = useState<Page>(() =>
+  loadFromStorage('ses-current-page', 'top'),
+)
 
   const [projects, setProjects] = useState<Project[]>(() =>
     loadFromStorage('ses-projects', mockProjects),
@@ -138,6 +140,10 @@ export default function App() {
   useEffect(() => {
     localStorage.setItem('ses-users', JSON.stringify(users))
   }, [users])
+
+  useEffect(() => {
+  localStorage.setItem('ses-current-page', JSON.stringify(currentPage))
+}, [currentPage])
 
   useEffect(() => {
     if (currentUserId === null) {
@@ -243,13 +249,37 @@ export default function App() {
   }
 
   const handleDeleteProject = (projectId: number) => {
-    setProjects((prev) => prev.filter((project) => project.id !== projectId))
+  setProjects((prev) =>
+    prev.map((project) =>
+      project.id === projectId
+        ? {
+            ...project,
+            deletedAt: new Date().toISOString(),
+          }
+        : project,
+    ),
+  )
 
-    setSelectedProject(null)
-    setEditingProject(null)
-    setSelectedProjectId(null)
-    setCurrentPage('projects')
-  }
+  setSelectedProject(null)
+  setEditingProject(null)
+  setSelectedProjectId(null)
+  setCurrentPage('projects')
+}
+
+const handleRestoreProject = (projectId: number) => {
+  setProjects((prev) =>
+    prev.map((project) =>
+      project.id === projectId
+        ? {
+            ...project,
+            deletedAt: null,
+          }
+        : project,
+    ),
+  )
+
+  setCurrentPage('projects')
+}
 
   const handleCreateEngineer = (engineer: Engineer) => {
     setEngineers((prev) => [engineer, ...prev])
@@ -273,15 +303,37 @@ export default function App() {
   }
 
   const handleDeleteEngineer = (engineerId: number) => {
-    setEngineers((prev) =>
-      prev.filter((engineer) => engineer.id !== engineerId),
-    )
+  setEngineers((prev) =>
+    prev.map((engineer) =>
+      engineer.id === engineerId
+        ? {
+            ...engineer,
+            deletedAt: new Date().toISOString(),
+          }
+        : engineer,
+    ),
+  )
 
-    setIsCreatingEngineer(false)
-    setSelectedEngineer(null)
-    setEditingEngineer(null)
-    setCurrentPage('engineers')
-  }
+  setIsCreatingEngineer(false)
+  setSelectedEngineer(null)
+  setEditingEngineer(null)
+  setCurrentPage('engineers')
+}
+
+const handleRestoreEngineer = (engineerId: number) => {
+  setEngineers((prev) =>
+    prev.map((engineer) =>
+      engineer.id === engineerId
+        ? {
+            ...engineer,
+            deletedAt: null,
+          }
+        : engineer,
+    ),
+  )
+
+  setCurrentPage('engineers')
+}
 
   const handleCreateSkill = (skill: Skill) => {
     setSkills((prev) => [skill, ...prev])
@@ -330,14 +382,36 @@ export default function App() {
   }
 
   const handleDeleteWorkRecord = (workRecordId: number) => {
-    setWorkRecords((prev) =>
-      prev.filter((workRecord) => workRecord.id !== workRecordId),
-    )
+  setWorkRecords((prev) =>
+    prev.map((workRecord) =>
+      workRecord.id === workRecordId
+        ? {
+            ...workRecord,
+            deletedAt: new Date().toISOString(),
+          }
+        : workRecord,
+    ),
+  )
 
-    setIsCreatingWorkRecord(false)
-    setEditingWorkRecord(null)
-    setCurrentPage('workRecords')
-  }
+  setIsCreatingWorkRecord(false)
+  setEditingWorkRecord(null)
+  setCurrentPage('workRecords')
+}
+
+const handleRestoreWorkRecord = (workRecordId: number) => {
+  setWorkRecords((prev) =>
+    prev.map((workRecord) =>
+      workRecord.id === workRecordId
+        ? {
+            ...workRecord,
+            deletedAt: null,
+          }
+        : workRecord,
+    ),
+  )
+
+  setCurrentPage('workRecords')
+}
 
   const syncStatusesByProposalHistory = (
   proposalHistory: ProposalHistory,
@@ -456,14 +530,36 @@ export default function App() {
 }
 
   const handleDeleteProposalHistory = (proposalHistoryId: number) => {
-    setProposalHistories((prev) =>
-      prev.filter((proposalHistory) => proposalHistory.id !== proposalHistoryId),
-    )
+  setProposalHistories((prev) =>
+    prev.map((proposalHistory) =>
+      proposalHistory.id === proposalHistoryId
+        ? {
+            ...proposalHistory,
+            deletedAt: new Date().toISOString(),
+          }
+        : proposalHistory,
+    ),
+  )
 
-    setSelectedProposalHistory(null)
-    setEditingProposalHistory(null)
-    setCurrentPage('proposals')
-  }
+  setSelectedProposalHistory(null)
+  setEditingProposalHistory(null)
+  setCurrentPage('proposals')
+}
+
+const handleRestoreProposalHistory = (proposalHistoryId: number) => {
+  setProposalHistories((prev) =>
+    prev.map((proposalHistory) =>
+      proposalHistory.id === proposalHistoryId
+        ? {
+            ...proposalHistory,
+            deletedAt: null,
+          }
+        : proposalHistory,
+    ),
+  )
+
+  setCurrentPage('proposals')
+}
 
   if (!currentUser) {
     if (authMode === 'register') {
@@ -511,14 +607,15 @@ export default function App() {
         selectedProjectId === null &&
         creatingProposal === null && (
           <ProjectListPage
-            currentUser={currentUser}
-            projects={projects}
-            onOpenCreate={() => setIsCreatingProject(true)}
-            onOpenDetail={(project) => setSelectedProject(project)}
-            onOpenEdit={(project) => setEditingProject(project)}
-            onOpenMatching={(projectId) => setSelectedProjectId(projectId)}
-            onDelete={handleDeleteProject}
-          />
+  currentUser={currentUser}
+  projects={projects}
+  onOpenCreate={() => setIsCreatingProject(true)}
+  onOpenDetail={(project) => setSelectedProject(project)}
+  onOpenEdit={(project) => setEditingProject(project)}
+  onOpenMatching={(projectId) => setSelectedProjectId(projectId)}
+  onDelete={handleDeleteProject}
+  onRestore={handleRestoreProject}
+/>
         )}
 
       {currentPage === 'projects' && isCreatingProject && (
@@ -585,13 +682,14 @@ export default function App() {
         selectedEngineer === null &&
         editingEngineer === null && (
           <EngineerListPage
-            currentUser={currentUser}
-            engineers={engineers}
-            onOpenCreate={() => setIsCreatingEngineer(true)}
-            onOpenDetail={(engineer) => setSelectedEngineer(engineer)}
-            onOpenEdit={(engineer) => setEditingEngineer(engineer)}
-            onDelete={handleDeleteEngineer}
-          />
+  currentUser={currentUser}
+  engineers={engineers}
+  onOpenCreate={() => setIsCreatingEngineer(true)}
+  onOpenDetail={(engineer) => setSelectedEngineer(engineer)}
+  onOpenEdit={(engineer) => setEditingEngineer(engineer)}
+  onDelete={handleDeleteEngineer}
+  onRestore={handleRestoreEngineer}
+/>
         )}
 
       {currentPage === 'engineers' && isCreatingEngineer && (
@@ -650,19 +748,20 @@ export default function App() {
         selectedProposalHistory === null &&
         editingProposalHistory === null && (
           <ProposalHistoryListPage
-            currentUser={currentUser}
-            proposalHistories={proposalHistories}
-            projects={projects}
-            engineers={engineers}
-            onOpenCreate={() => setIsCreatingProposalHistory(true)}
-            onShowDetail={(proposalHistory) =>
-              setSelectedProposalHistory(proposalHistory)
-            }
-            onEdit={(proposalHistory) =>
-              setEditingProposalHistory(proposalHistory)
-            }
-            onDelete={handleDeleteProposalHistory}
-          />
+  currentUser={currentUser}
+  proposalHistories={proposalHistories}
+  projects={projects}
+  engineers={engineers}
+  onOpenCreate={() => setIsCreatingProposalHistory(true)}
+  onShowDetail={(proposalHistory) =>
+    setSelectedProposalHistory(proposalHistory)
+  }
+  onEdit={(proposalHistory) =>
+    setEditingProposalHistory(proposalHistory)
+  }
+  onDelete={handleDeleteProposalHistory}
+  onRestore={handleRestoreProposalHistory}
+/>
         )}
 
       {currentPage === 'proposals' && isCreatingProposalHistory && (
@@ -697,13 +796,14 @@ export default function App() {
         !isCreatingWorkRecord &&
         editingWorkRecord === null && (
           <WorkRecordListPage
-            workRecords={workRecords}
-            projects={projects}
-            engineers={engineers}
-            onOpenCreate={() => setIsCreatingWorkRecord(true)}
-            onOpenEdit={(workRecord) => setEditingWorkRecord(workRecord)}
-            onDelete={handleDeleteWorkRecord}
-          />
+  workRecords={workRecords}
+  projects={projects}
+  engineers={engineers}
+  onOpenCreate={() => setIsCreatingWorkRecord(true)}
+  onOpenEdit={(workRecord) => setEditingWorkRecord(workRecord)}
+  onDelete={handleDeleteWorkRecord}
+  onRestore={handleRestoreWorkRecord}
+/>
         )}
 
       {currentPage === 'workRecords' && isCreatingWorkRecord && (
