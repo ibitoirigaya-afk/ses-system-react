@@ -31,7 +31,6 @@ import WorkRecordEditPage from './features/workRecords/WorkRecordEditPage'
 import DashboardPage from './features/dashboard/DashboardPage'
 import { mockUsers } from './data/mockUsers'
 import { mockProposalHistories } from './data/mockProposalHistories'
-import { mockWorkRecords } from './data/mockWorkRecords'
 
 import {
   loadFromStorage,
@@ -46,6 +45,7 @@ import {
 import { useProjects } from './hooks/useProjects'
 import { useEngineers } from './hooks/useEngineers'
 import { useSkills } from './hooks/useSkills'
+import { useWorkRecords } from './hooks/useWorkRecords'
 
 type Page =
   | 'top'
@@ -90,6 +90,14 @@ const {
   deleteSkill,
 } = useSkills()
 
+const {
+  workRecords,
+  createWorkRecord,
+  updateWorkRecord,
+  deleteWorkRecord,
+  restoreWorkRecord,
+} = useWorkRecords()
+
   const [users, setUsers] = useState<User[]>(() =>
     loadFromStorage(STORAGE_KEYS.users, mockUsers),
   )
@@ -117,10 +125,6 @@ const {
 
   const [isCreatingSkill, setIsCreatingSkill] = useState(false)
   const [editingSkill, setEditingSkill] = useState<Skill | null>(null)
-
-  const [workRecords, setWorkRecords] = useState<WorkRecord[]>(() =>
-    loadFromStorage(STORAGE_KEYS.workRecords, mockWorkRecords),
-  )
 
   const [isCreatingWorkRecord, setIsCreatingWorkRecord] = useState(false)
   const [editingWorkRecord, setEditingWorkRecord] =
@@ -163,10 +167,6 @@ const {
 
     saveToStorage(STORAGE_KEYS.currentUserId, currentUserId)
   }, [currentUserId])
-
-  useEffect(() => {
-  saveToStorage('ses-work-records', workRecords)
-}, [workRecords])
 
   useEffect(() => {
   saveToStorage('ses-proposal-histories', proposalHistories)
@@ -326,37 +326,23 @@ const handleRestoreEngineer = (engineerId: number) => {
 }
 
   const handleCreateWorkRecord = (workRecord: WorkRecord) => {
-    setWorkRecords((prev) => [workRecord, ...prev])
-    setIsCreatingWorkRecord(false)
-    setEditingWorkRecord(null)
-    setCurrentPage('workRecords')
-  }
+  createWorkRecord(workRecord)
+
+  setIsCreatingWorkRecord(false)
+  setEditingWorkRecord(null)
+  setCurrentPage('workRecords')
+}
 
   const handleUpdateWorkRecord = (updatedWorkRecord: WorkRecord) => {
-    setWorkRecords((prev) =>
-      prev.map((workRecord) =>
-        workRecord.id === updatedWorkRecord.id
-          ? updatedWorkRecord
-          : workRecord,
-      ),
-    )
+  updateWorkRecord(updatedWorkRecord)
 
-    setIsCreatingWorkRecord(false)
-    setEditingWorkRecord(null)
-    setCurrentPage('workRecords')
-  }
+  setIsCreatingWorkRecord(false)
+  setEditingWorkRecord(null)
+  setCurrentPage('workRecords')
+}
 
   const handleDeleteWorkRecord = (workRecordId: number) => {
-  setWorkRecords((prev) =>
-    prev.map((workRecord) =>
-      workRecord.id === workRecordId
-        ? {
-            ...workRecord,
-            deletedAt: new Date().toISOString(),
-          }
-        : workRecord,
-    ),
-  )
+  deleteWorkRecord(workRecordId)
 
   setIsCreatingWorkRecord(false)
   setEditingWorkRecord(null)
@@ -364,16 +350,7 @@ const handleRestoreEngineer = (engineerId: number) => {
 }
 
 const handleRestoreWorkRecord = (workRecordId: number) => {
-  setWorkRecords((prev) =>
-    prev.map((workRecord) =>
-      workRecord.id === workRecordId
-        ? {
-            ...workRecord,
-            deletedAt: null,
-          }
-        : workRecord,
-    ),
-  )
+  restoreWorkRecord(workRecordId)
 
   setCurrentPage('workRecords')
 }
