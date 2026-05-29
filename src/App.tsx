@@ -353,12 +353,25 @@ const handleRestoreEngineer = (engineerId: number) => {
   }
 
   const handleDeleteSkill = (skillId: number) => {
-    setSkills((prev) => prev.filter((skill) => skill.id !== skillId))
+  const usedByProject = projects.some((project) =>
+    project.skills.some((skill) => skill.id === skillId),
+  )
 
-    setIsCreatingSkill(false)
-    setEditingSkill(null)
-    setCurrentPage('skills')
+  const usedByEngineer = engineers.some((engineer) =>
+    engineer.skills.some((skill) => skill.id === skillId),
+  )
+
+  if (usedByProject || usedByEngineer) {
+    alert('このスキルは案件または要員で使用中のため削除できません。')
+    return
   }
+
+  setSkills((prev) => prev.filter((skill) => skill.id !== skillId))
+
+  setIsCreatingSkill(false)
+  setEditingSkill(null)
+  setCurrentPage('skills')
+}
 
   const handleCreateWorkRecord = (workRecord: WorkRecord) => {
     setWorkRecords((prev) => [workRecord, ...prev])
