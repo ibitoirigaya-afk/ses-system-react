@@ -29,11 +29,9 @@ import WorkRecordListPage from './features/workRecords/WorkRecordListPage'
 import WorkRecordCreatePage from './features/workRecords/WorkRecordCreatePage'
 import WorkRecordEditPage from './features/workRecords/WorkRecordEditPage'
 import DashboardPage from './features/dashboard/DashboardPage'
-import { mockUsers } from './data/mockUsers'
 
 import {
   loadFromStorage,
-  removeFromStorage,
   saveToStorage,
 } from './utils/storage'
 import { STORAGE_KEYS } from './constants/storageKeys'
@@ -46,6 +44,7 @@ import { useEngineers } from './hooks/useEngineers'
 import { useSkills } from './hooks/useSkills'
 import { useWorkRecords } from './hooks/useWorkRecords'
 import { useProposalHistories } from './hooks/useProposalHistories'
+import { useAuthUsers } from './hooks/useAuthUsers'
 
 type Page =
   | 'top'
@@ -106,13 +105,13 @@ const {
   restoreProposalHistory,
 } = useProposalHistories()
 
-  const [users, setUsers] = useState<User[]>(() =>
-    loadFromStorage(STORAGE_KEYS.users, mockUsers),
-  )
-
-  const [currentUserId, setCurrentUserId] = useState<number | null>(() =>
-    loadFromStorage(STORAGE_KEYS.currentUserId, null),
-  )
+const {
+  users,
+  currentUser,
+  login,
+  register,
+  logout,
+} = useAuthUsers()
 
   const [currentPage, setCurrentPage] = useState<Page>(() =>
     loadFromStorage(STORAGE_KEYS.currentPage, 'top'),
@@ -150,27 +149,9 @@ const {
   const [isCreatingProposalHistory, setIsCreatingProposalHistory] =
     useState(false)
 
-  const currentUser =
-    currentUserId === null
-      ? undefined
-      : users.find((user) => user.id === currentUserId)
-
-  useEffect(() => {
-  saveToStorage(STORAGE_KEYS.users, users)
-}, [users])
-
   useEffect(() => {
   saveToStorage('ses-current-page', currentPage)
 }, [currentPage])
-
-  useEffect(() => {
-    if (currentUserId === null) {
-      removeFromStorage('ses-current-user-id')
-      return
-    }
-
-    saveToStorage(STORAGE_KEYS.currentUserId, currentUserId)
-  }, [currentUserId])
 
   const resetPageState = () => {
     setIsCreatingProject(false)
@@ -201,24 +182,26 @@ const {
   }
 
   const handleLogin = (userId: number) => {
-    setCurrentUserId(userId)
-    setCurrentPage('top')
-    resetPageState()
-  }
+  login(userId)
+
+  setCurrentPage('top')
+  resetPageState()
+}
 
   const handleRegister = (user: User) => {
-    setUsers((prev) => [user, ...prev])
-    setCurrentUserId(user.id)
-    setCurrentPage('top')
-    resetPageState()
-  }
+  register(user)
+
+  setCurrentPage('top')
+  resetPageState()
+}
 
   const handleLogout = () => {
-    setCurrentUserId(null)
-    setAuthMode('login')
-    setCurrentPage('top')
-    resetPageState()
-  }
+  logout()
+
+  setAuthMode('login')
+  setCurrentPage('top')
+  resetPageState()
+}
 
   const handleCreateProject = (project: Project) => {
   createProject(project)
