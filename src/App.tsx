@@ -30,7 +30,6 @@ import WorkRecordCreatePage from './features/workRecords/WorkRecordCreatePage'
 import WorkRecordEditPage from './features/workRecords/WorkRecordEditPage'
 import DashboardPage from './features/dashboard/DashboardPage'
 import { mockUsers } from './data/mockUsers'
-import { mockEngineers } from './data/mockEngineers'
 import { mockSkills } from './data/mockSkills'
 import { mockProposalHistories } from './data/mockProposalHistories'
 import { mockWorkRecords } from './data/mockWorkRecords'
@@ -46,6 +45,7 @@ import {
   getProjectStatusByProposalStatus,
 } from './utils/proposalStatusSync'
 import { useProjects } from './hooks/useProjects'
+import { useEngineers } from './hooks/useEngineers'
 
 type Page =
   | 'top'
@@ -74,6 +74,15 @@ export default function App() {
   restoreProject,
 } = useProjects()
 
+const {
+  engineers,
+  setEngineers,
+  createEngineer,
+  updateEngineer,
+  deleteEngineer,
+  restoreEngineer,
+} = useEngineers()
+
   const [users, setUsers] = useState<User[]>(() =>
     loadFromStorage(STORAGE_KEYS.users, mockUsers),
   )
@@ -91,10 +100,6 @@ export default function App() {
   const [editingProject, setEditingProject] = useState<Project | null>(null)
   const [selectedProjectId, setSelectedProjectId] = useState<number | null>(
     null,
-  )
-
-  const [engineers, setEngineers] = useState<Engineer[]>(() =>
-    loadFromStorage(STORAGE_KEYS.engineers, mockEngineers),
   )
 
   const [isCreatingEngineer, setIsCreatingEngineer] = useState(false)
@@ -155,10 +160,6 @@ export default function App() {
 
     saveToStorage(STORAGE_KEYS.currentUserId, currentUserId)
   }, [currentUserId])
-
-  useEffect(() => {
-  saveToStorage('ses-engineers', engineers)
-}, [engineers])
 
   useEffect(() => {
   saveToStorage('ses-skills', skills)
@@ -256,37 +257,25 @@ const handleRestoreProject = (projectId: number) => {
 }
 
   const handleCreateEngineer = (engineer: Engineer) => {
-    setEngineers((prev) => [engineer, ...prev])
-    setIsCreatingEngineer(false)
-    setSelectedEngineer(null)
-    setEditingEngineer(null)
-    setCurrentPage('engineers')
-  }
+  createEngineer(engineer)
+
+  setIsCreatingEngineer(false)
+  setSelectedEngineer(null)
+  setEditingEngineer(null)
+  setCurrentPage('engineers')
+}
 
   const handleUpdateEngineer = (updatedEngineer: Engineer) => {
-    setEngineers((prev) =>
-      prev.map((engineer) =>
-        engineer.id === updatedEngineer.id ? updatedEngineer : engineer,
-      ),
-    )
+  updateEngineer(updatedEngineer)
 
-    setIsCreatingEngineer(false)
-    setSelectedEngineer(null)
-    setEditingEngineer(null)
-    setCurrentPage('engineers')
-  }
+  setIsCreatingEngineer(false)
+  setSelectedEngineer(null)
+  setEditingEngineer(null)
+  setCurrentPage('engineers')
+}
 
   const handleDeleteEngineer = (engineerId: number) => {
-  setEngineers((prev) =>
-    prev.map((engineer) =>
-      engineer.id === engineerId
-        ? {
-            ...engineer,
-            deletedAt: new Date().toISOString(),
-          }
-        : engineer,
-    ),
-  )
+  deleteEngineer(engineerId)
 
   setIsCreatingEngineer(false)
   setSelectedEngineer(null)
@@ -295,16 +284,7 @@ const handleRestoreProject = (projectId: number) => {
 }
 
 const handleRestoreEngineer = (engineerId: number) => {
-  setEngineers((prev) =>
-    prev.map((engineer) =>
-      engineer.id === engineerId
-        ? {
-            ...engineer,
-            deletedAt: null,
-          }
-        : engineer,
-    ),
-  )
+  restoreEngineer(engineerId)
 
   setCurrentPage('engineers')
 }
