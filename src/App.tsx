@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import type { User } from './features/auth/authTypes'
-import type { ProposalHistory } from './features/proposals/proposalTypes'
 import type { Project } from './features/projects/projectTypes'
+import type { ProposalHistory } from './features/proposals/proposalTypes'
 import type { Engineer } from './features/engineers/engineerTypes'
 import type { Skill } from './features/skills/skillTypes'
 import type { WorkRecord } from './features/workRecords/workRecordTypes'
@@ -30,7 +30,6 @@ import WorkRecordCreatePage from './features/workRecords/WorkRecordCreatePage'
 import WorkRecordEditPage from './features/workRecords/WorkRecordEditPage'
 import DashboardPage from './features/dashboard/DashboardPage'
 import { mockUsers } from './data/mockUsers'
-import { mockProjects } from './data/mockProjects'
 import { mockEngineers } from './data/mockEngineers'
 import { mockSkills } from './data/mockSkills'
 import { mockProposalHistories } from './data/mockProposalHistories'
@@ -46,6 +45,7 @@ import {
   getEngineerStatusByProposalStatus,
   getProjectStatusByProposalStatus,
 } from './utils/proposalStatusSync'
+import { useProjects } from './hooks/useProjects'
 
 type Page =
   | 'top'
@@ -65,6 +65,15 @@ type CreatingProposal = {
 export default function App() {
   const [authMode, setAuthMode] = useState<AuthMode>('login')
 
+  const {
+  projects,
+  setProjects,
+  createProject,
+  updateProject,
+  deleteProject,
+  restoreProject,
+} = useProjects()
+
   const [users, setUsers] = useState<User[]>(() =>
     loadFromStorage(STORAGE_KEYS.users, mockUsers),
   )
@@ -75,10 +84,6 @@ export default function App() {
 
   const [currentPage, setCurrentPage] = useState<Page>(() =>
     loadFromStorage(STORAGE_KEYS.currentPage, 'top'),
-  )
-
-  const [projects, setProjects] = useState<Project[]>(() =>
-    loadFromStorage(STORAGE_KEYS.projects, mockProjects),
   )
 
   const [isCreatingProject, setIsCreatingProject] = useState(false)
@@ -152,10 +157,6 @@ export default function App() {
   }, [currentUserId])
 
   useEffect(() => {
-  saveToStorage('ses-projects', projects)
-}, [projects])
-
-  useEffect(() => {
   saveToStorage('ses-engineers', engineers)
 }, [engineers])
 
@@ -220,39 +221,27 @@ export default function App() {
   }
 
   const handleCreateProject = (project: Project) => {
-    setProjects((prev) => [project, ...prev])
-    setIsCreatingProject(false)
-    setSelectedProject(null)
-    setEditingProject(null)
-    setSelectedProjectId(null)
-    setCurrentPage('projects')
-  }
+  createProject(project)
+
+  setIsCreatingProject(false)
+  setSelectedProject(null)
+  setEditingProject(null)
+  setSelectedProjectId(null)
+  setCurrentPage('projects')
+}
 
   const handleUpdateProject = (updatedProject: Project) => {
-    setProjects((prev) =>
-      prev.map((project) =>
-        project.id === updatedProject.id ? updatedProject : project,
-      ),
-    )
+  updateProject(updatedProject)
 
-    setSelectedProject(null)
-    setEditingProject(null)
-    setIsCreatingProject(false)
-    setSelectedProjectId(null)
-    setCurrentPage('projects')
-  }
+  setSelectedProject(null)
+  setEditingProject(null)
+  setIsCreatingProject(false)
+  setSelectedProjectId(null)
+  setCurrentPage('projects')
+}
 
   const handleDeleteProject = (projectId: number) => {
-  setProjects((prev) =>
-    prev.map((project) =>
-      project.id === projectId
-        ? {
-            ...project,
-            deletedAt: new Date().toISOString(),
-          }
-        : project,
-    ),
-  )
+  deleteProject(projectId)
 
   setSelectedProject(null)
   setEditingProject(null)
@@ -261,16 +250,7 @@ export default function App() {
 }
 
 const handleRestoreProject = (projectId: number) => {
-  setProjects((prev) =>
-    prev.map((project) =>
-      project.id === projectId
-        ? {
-            ...project,
-            deletedAt: null,
-          }
-        : project,
-    ),
-  )
+  restoreProject(projectId)
 
   setCurrentPage('projects')
 }
