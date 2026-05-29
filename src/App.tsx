@@ -30,7 +30,6 @@ import WorkRecordCreatePage from './features/workRecords/WorkRecordCreatePage'
 import WorkRecordEditPage from './features/workRecords/WorkRecordEditPage'
 import DashboardPage from './features/dashboard/DashboardPage'
 import { mockUsers } from './data/mockUsers'
-import { mockSkills } from './data/mockSkills'
 import { mockProposalHistories } from './data/mockProposalHistories'
 import { mockWorkRecords } from './data/mockWorkRecords'
 
@@ -46,6 +45,7 @@ import {
 } from './utils/proposalStatusSync'
 import { useProjects } from './hooks/useProjects'
 import { useEngineers } from './hooks/useEngineers'
+import { useSkills } from './hooks/useSkills'
 
 type Page =
   | 'top'
@@ -83,6 +83,13 @@ const {
   restoreEngineer,
 } = useEngineers()
 
+const {
+  skills,
+  createSkill,
+  updateSkill,
+  deleteSkill,
+} = useSkills()
+
   const [users, setUsers] = useState<User[]>(() =>
     loadFromStorage(STORAGE_KEYS.users, mockUsers),
   )
@@ -107,10 +114,6 @@ const {
     null,
   )
   const [editingEngineer, setEditingEngineer] = useState<Engineer | null>(null)
-
-  const [skills, setSkills] = useState<Skill[]>(() =>
-    loadFromStorage(STORAGE_KEYS.skills, mockSkills),
-  )
 
   const [isCreatingSkill, setIsCreatingSkill] = useState(false)
   const [editingSkill, setEditingSkill] = useState<Skill | null>(null)
@@ -160,10 +163,6 @@ const {
 
     saveToStorage(STORAGE_KEYS.currentUserId, currentUserId)
   }, [currentUserId])
-
-  useEffect(() => {
-  saveToStorage('ses-skills', skills)
-}, [skills])
 
   useEffect(() => {
   saveToStorage('ses-work-records', workRecords)
@@ -290,21 +289,20 @@ const handleRestoreEngineer = (engineerId: number) => {
 }
 
   const handleCreateSkill = (skill: Skill) => {
-    setSkills((prev) => [skill, ...prev])
-    setIsCreatingSkill(false)
-    setEditingSkill(null)
-    setCurrentPage('skills')
-  }
+  createSkill(skill)
+
+  setIsCreatingSkill(false)
+  setEditingSkill(null)
+  setCurrentPage('skills')
+}
 
   const handleUpdateSkill = (updatedSkill: Skill) => {
-    setSkills((prev) =>
-      prev.map((skill) => (skill.id === updatedSkill.id ? updatedSkill : skill)),
-    )
+  updateSkill(updatedSkill)
 
-    setIsCreatingSkill(false)
-    setEditingSkill(null)
-    setCurrentPage('skills')
-  }
+  setIsCreatingSkill(false)
+  setEditingSkill(null)
+  setCurrentPage('skills')
+}
 
   const handleDeleteSkill = (skillId: number) => {
   const usedByProject = projects.some((project) =>
@@ -320,7 +318,7 @@ const handleRestoreEngineer = (engineerId: number) => {
     return
   }
 
-  setSkills((prev) => prev.filter((skill) => skill.id !== skillId))
+  deleteSkill(skillId)
 
   setIsCreatingSkill(false)
   setEditingSkill(null)
