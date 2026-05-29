@@ -30,7 +30,6 @@ import WorkRecordCreatePage from './features/workRecords/WorkRecordCreatePage'
 import WorkRecordEditPage from './features/workRecords/WorkRecordEditPage'
 import DashboardPage from './features/dashboard/DashboardPage'
 import { mockUsers } from './data/mockUsers'
-import { mockProposalHistories } from './data/mockProposalHistories'
 
 import {
   loadFromStorage,
@@ -46,6 +45,7 @@ import { useProjects } from './hooks/useProjects'
 import { useEngineers } from './hooks/useEngineers'
 import { useSkills } from './hooks/useSkills'
 import { useWorkRecords } from './hooks/useWorkRecords'
+import { useProposalHistories } from './hooks/useProposalHistories'
 
 type Page =
   | 'top'
@@ -98,6 +98,14 @@ const {
   restoreWorkRecord,
 } = useWorkRecords()
 
+const {
+  proposalHistories,
+  createProposalHistory,
+  updateProposalHistory,
+  deleteProposalHistory,
+  restoreProposalHistory,
+} = useProposalHistories()
+
   const [users, setUsers] = useState<User[]>(() =>
     loadFromStorage(STORAGE_KEYS.users, mockUsers),
   )
@@ -133,10 +141,6 @@ const {
   const [creatingProposal, setCreatingProposal] =
     useState<CreatingProposal | null>(null)
 
-  const [proposalHistories, setProposalHistories] = useState<ProposalHistory[]>(
-    () => loadFromStorage(STORAGE_KEYS.proposalHistories, mockProposalHistories),
-  )
-
   const [selectedProposalHistory, setSelectedProposalHistory] =
     useState<ProposalHistory | null>(null)
 
@@ -167,10 +171,6 @@ const {
 
     saveToStorage(STORAGE_KEYS.currentUserId, currentUserId)
   }, [currentUserId])
-
-  useEffect(() => {
-  saveToStorage('ses-proposal-histories', proposalHistories)
-}, [proposalHistories])
 
   const resetPageState = () => {
     setIsCreatingProject(false)
@@ -390,7 +390,7 @@ const handleRestoreWorkRecord = (workRecordId: number) => {
 }
 
   const handleCreateProposalHistory = (proposalHistory: ProposalHistory) => {
-  setProposalHistories((prev) => [proposalHistory, ...prev])
+  createProposalHistory(proposalHistory)
 
   syncStatusesByProposalHistory(proposalHistory)
 
@@ -405,13 +405,7 @@ const handleRestoreWorkRecord = (workRecordId: number) => {
   const handleUpdateProposalHistory = (
   updatedProposalHistory: ProposalHistory,
 ) => {
-  setProposalHistories((prev) =>
-    prev.map((proposalHistory) =>
-      proposalHistory.id === updatedProposalHistory.id
-        ? updatedProposalHistory
-        : proposalHistory,
-    ),
-  )
+  updateProposalHistory(updatedProposalHistory)
 
   syncStatusesByProposalHistory(updatedProposalHistory)
 
@@ -421,16 +415,7 @@ const handleRestoreWorkRecord = (workRecordId: number) => {
 }
 
   const handleDeleteProposalHistory = (proposalHistoryId: number) => {
-  setProposalHistories((prev) =>
-    prev.map((proposalHistory) =>
-      proposalHistory.id === proposalHistoryId
-        ? {
-            ...proposalHistory,
-            deletedAt: new Date().toISOString(),
-          }
-        : proposalHistory,
-    ),
-  )
+  deleteProposalHistory(proposalHistoryId)
 
   setSelectedProposalHistory(null)
   setEditingProposalHistory(null)
@@ -438,16 +423,7 @@ const handleRestoreWorkRecord = (workRecordId: number) => {
 }
 
 const handleRestoreProposalHistory = (proposalHistoryId: number) => {
-  setProposalHistories((prev) =>
-    prev.map((proposalHistory) =>
-      proposalHistory.id === proposalHistoryId
-        ? {
-            ...proposalHistory,
-            deletedAt: null,
-          }
-        : proposalHistory,
-    ),
-  )
+  restoreProposalHistory(proposalHistoryId)
 
   setCurrentPage('proposals')
 }
