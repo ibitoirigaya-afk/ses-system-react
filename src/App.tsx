@@ -65,53 +65,53 @@ export default function App() {
   const [authMode, setAuthMode] = useState<AuthMode>('login')
 
   const {
-  projects,
-  setProjects,
-  createProject,
-  updateProject,
-  deleteProject,
-  restoreProject,
-} = useProjects()
+    projects,
+    setProjects,
+    createProject,
+    updateProject,
+    deleteProject,
+    restoreProject,
+  } = useProjects()
 
-const {
-  engineers,
-  setEngineers,
-  createEngineer,
-  updateEngineer,
-  deleteEngineer,
-  restoreEngineer,
-} = useEngineers()
+  const {
+    engineers,
+    setEngineers,
+    createEngineer,
+    updateEngineer,
+    deleteEngineer,
+    restoreEngineer,
+  } = useEngineers()
 
-const {
-  skills,
-  createSkill,
-  updateSkill,
-  deleteSkill,
-} = useSkills()
+  const {
+    skills,
+    createSkill,
+    updateSkill,
+    deleteSkill,
+  } = useSkills()
 
-const {
-  workRecords,
-  createWorkRecord,
-  updateWorkRecord,
-  deleteWorkRecord,
-  restoreWorkRecord,
-} = useWorkRecords()
+  const {
+    workRecords,
+    createWorkRecord,
+    updateWorkRecord,
+    deleteWorkRecord,
+    restoreWorkRecord,
+  } = useWorkRecords()
 
-const {
-  proposalHistories,
-  createProposalHistory,
-  updateProposalHistory,
-  deleteProposalHistory,
-  restoreProposalHistory,
-} = useProposalHistories()
+  const {
+    proposalHistories,
+    createProposalHistory,
+    updateProposalHistory,
+    deleteProposalHistory,
+    restoreProposalHistory,
+  } = useProposalHistories()
 
-const {
-  users,
-  currentUser,
-  login,
-  register,
-  logout,
-} = useAuthUsers()
+  const {
+    users,
+    currentUser,
+    login,
+    register,
+    logout,
+  } = useAuthUsers()
 
   const [currentPage, setCurrentPage] = useState<Page>(() =>
     loadFromStorage(STORAGE_KEYS.currentPage, 'top'),
@@ -150,8 +150,8 @@ const {
     useState(false)
 
   useEffect(() => {
-  saveToStorage('ses-current-page', currentPage)
-}, [currentPage])
+    saveToStorage('ses-current-page', currentPage)
+  }, [currentPage])
 
   const resetPageState = () => {
     setIsCreatingProject(false)
@@ -182,234 +182,221 @@ const {
   }
 
   const handleLogin = (userId: number) => {
-  login(userId)
+    login(userId)
 
-  setCurrentPage('top')
-  resetPageState()
-}
-
-  const handleRegister = (user: User) => {
-  register(user)
-
-  setCurrentPage('top')
-  resetPageState()
-}
-
-  const handleLogout = () => {
-  logout()
-
-  setAuthMode('login')
-  setCurrentPage('top')
-  resetPageState()
-}
-
-  const handleCreateProject = (project: Project) => {
-  createProject(project)
-
-  setIsCreatingProject(false)
-  setSelectedProject(null)
-  setEditingProject(null)
-  setSelectedProjectId(null)
-  setCurrentPage('projects')
-}
-
-  const handleUpdateProject = (updatedProject: Project) => {
-  updateProject(updatedProject)
-
-  setSelectedProject(null)
-  setEditingProject(null)
-  setIsCreatingProject(false)
-  setSelectedProjectId(null)
-  setCurrentPage('projects')
-}
-
-  const handleDeleteProject = (projectId: number) => {
-  deleteProject(projectId)
-
-  setSelectedProject(null)
-  setEditingProject(null)
-  setSelectedProjectId(null)
-  setCurrentPage('projects')
-}
-
-const handleRestoreProject = (projectId: number) => {
-  restoreProject(projectId)
-
-  setCurrentPage('projects')
-}
-
-  const handleCreateEngineer = (engineer: Engineer) => {
-  createEngineer(engineer)
-
-  setIsCreatingEngineer(false)
-  setSelectedEngineer(null)
-  setEditingEngineer(null)
-  setCurrentPage('engineers')
-}
-
-  const handleUpdateEngineer = (updatedEngineer: Engineer) => {
-  updateEngineer(updatedEngineer)
-
-  setIsCreatingEngineer(false)
-  setSelectedEngineer(null)
-  setEditingEngineer(null)
-  setCurrentPage('engineers')
-}
-
-  const handleDeleteEngineer = (engineerId: number) => {
-  deleteEngineer(engineerId)
-
-  setIsCreatingEngineer(false)
-  setSelectedEngineer(null)
-  setEditingEngineer(null)
-  setCurrentPage('engineers')
-}
-
-const handleRestoreEngineer = (engineerId: number) => {
-  restoreEngineer(engineerId)
-
-  setCurrentPage('engineers')
-}
-
-  const handleCreateSkill = (skill: Skill) => {
-  createSkill(skill)
-
-  setIsCreatingSkill(false)
-  setEditingSkill(null)
-  setCurrentPage('skills')
-}
-
-  const handleUpdateSkill = (updatedSkill: Skill) => {
-  updateSkill(updatedSkill)
-
-  setIsCreatingSkill(false)
-  setEditingSkill(null)
-  setCurrentPage('skills')
-}
-
-  const handleDeleteSkill = (skillId: number) => {
-  const usedByProject = projects.some((project) =>
-    project.skills.some((skill) => skill.id === skillId),
-  )
-
-  const usedByEngineer = engineers.some((engineer) =>
-    engineer.skills.some((skill) => skill.id === skillId),
-  )
-
-  if (usedByProject || usedByEngineer) {
-    alert('このスキルは案件または要員で使用中のため削除できません。')
-    return
+    setCurrentPage('top')
+    resetPageState()
   }
 
-  deleteSkill(skillId)
+  const handleRegister = (user: User) => {
+    register(user)
 
-  setIsCreatingSkill(false)
-  setEditingSkill(null)
-  setCurrentPage('skills')
-}
+    setCurrentPage('top')
+    resetPageState()
+  }
+
+  const handleLogout = () => {
+    logout()
+
+    setAuthMode('login')
+    setCurrentPage('top')
+    resetPageState()
+  }
+
+  const handleCreateProject = (project: Project) => {
+    createProject(project)
+
+    setIsCreatingProject(false)
+    setSelectedProject(null)
+    setEditingProject(null)
+    setSelectedProjectId(null)
+    setCurrentPage('projects')
+  }
+
+  const handleUpdateProject = (updatedProject: Project) => {
+    updateProject(updatedProject)
+
+    setSelectedProject(null)
+    setEditingProject(null)
+    setIsCreatingProject(false)
+    setSelectedProjectId(null)
+    setCurrentPage('projects')
+  }
+
+  const handleDeleteProject = (projectId: number) => {
+    deleteProject(projectId)
+
+    setSelectedProject(null)
+    setEditingProject(null)
+    setSelectedProjectId(null)
+    setCurrentPage('projects')
+  }
+
+  const handleRestoreProject = (projectId: number) => {
+    restoreProject(projectId)
+
+    setCurrentPage('projects')
+  }
+
+  const handleCreateEngineer = (engineer: Engineer) => {
+    createEngineer(engineer)
+
+    setIsCreatingEngineer(false)
+    setSelectedEngineer(null)
+    setEditingEngineer(null)
+    setCurrentPage('engineers')
+  }
+
+  const handleUpdateEngineer = (updatedEngineer: Engineer) => {
+    updateEngineer(updatedEngineer)
+
+    setIsCreatingEngineer(false)
+    setSelectedEngineer(null)
+    setEditingEngineer(null)
+    setCurrentPage('engineers')
+  }
+
+  const handleDeleteEngineer = (engineerId: number) => {
+    deleteEngineer(engineerId)
+
+    setIsCreatingEngineer(false)
+    setSelectedEngineer(null)
+    setEditingEngineer(null)
+    setCurrentPage('engineers')
+  }
+
+  const handleRestoreEngineer = (engineerId: number) => {
+    restoreEngineer(engineerId)
+
+    setCurrentPage('engineers')
+  }
+
+  const handleCreateSkill = (skill: Skill) => {
+    createSkill(skill)
+
+    setIsCreatingSkill(false)
+    setEditingSkill(null)
+    setCurrentPage('skills')
+  }
+
+  const handleUpdateSkill = (updatedSkill: Skill) => {
+    updateSkill(updatedSkill)
+
+    setIsCreatingSkill(false)
+    setEditingSkill(null)
+    setCurrentPage('skills')
+  }
+
+  const handleDeleteSkill = (skillId: number) => {
+    deleteSkill(skillId)
+
+    setIsCreatingSkill(false)
+    setEditingSkill(null)
+    setCurrentPage('skills')
+  }
 
   const handleCreateWorkRecord = (workRecord: WorkRecord) => {
-  createWorkRecord(workRecord)
+    createWorkRecord(workRecord)
 
-  setIsCreatingWorkRecord(false)
-  setEditingWorkRecord(null)
-  setCurrentPage('workRecords')
-}
+    setIsCreatingWorkRecord(false)
+    setEditingWorkRecord(null)
+    setCurrentPage('workRecords')
+  }
 
   const handleUpdateWorkRecord = (updatedWorkRecord: WorkRecord) => {
-  updateWorkRecord(updatedWorkRecord)
+    updateWorkRecord(updatedWorkRecord)
 
-  setIsCreatingWorkRecord(false)
-  setEditingWorkRecord(null)
-  setCurrentPage('workRecords')
-}
+    setIsCreatingWorkRecord(false)
+    setEditingWorkRecord(null)
+    setCurrentPage('workRecords')
+  }
 
   const handleDeleteWorkRecord = (workRecordId: number) => {
-  deleteWorkRecord(workRecordId)
+    deleteWorkRecord(workRecordId)
 
-  setIsCreatingWorkRecord(false)
-  setEditingWorkRecord(null)
-  setCurrentPage('workRecords')
-}
+    setIsCreatingWorkRecord(false)
+    setEditingWorkRecord(null)
+    setCurrentPage('workRecords')
+  }
 
-const handleRestoreWorkRecord = (workRecordId: number) => {
-  restoreWorkRecord(workRecordId)
+  const handleRestoreWorkRecord = (workRecordId: number) => {
+    restoreWorkRecord(workRecordId)
 
-  setCurrentPage('workRecords')
-}
+    setCurrentPage('workRecords')
+  }
 
   const syncStatusesByProposalHistory = (
-  proposalHistory: ProposalHistory,
-) => {
-  const nextProjectStatus = getProjectStatusByProposalStatus(
-    proposalHistory.status,
-  )
+    proposalHistory: ProposalHistory,
+  ) => {
+    const nextProjectStatus = getProjectStatusByProposalStatus(
+      proposalHistory.status,
+    )
 
-  const nextEngineerStatus = getEngineerStatusByProposalStatus(
-    proposalHistory.status,
-  )
+    const nextEngineerStatus = getEngineerStatusByProposalStatus(
+      proposalHistory.status,
+    )
 
-  setProjects((prev) =>
-    prev.map((project) =>
-      project.id === proposalHistory.projectId
-        ? {
+    setProjects((prev) =>
+      prev.map((project) =>
+        project.id === proposalHistory.projectId
+          ? {
             ...project,
             status: nextProjectStatus,
           }
-        : project,
-    ),
-  )
+          : project,
+      ),
+    )
 
-  setEngineers((prev) =>
-    prev.map((engineer) =>
-      engineer.id === proposalHistory.engineerId
-        ? {
+    setEngineers((prev) =>
+      prev.map((engineer) =>
+        engineer.id === proposalHistory.engineerId
+          ? {
             ...engineer,
             status: nextEngineerStatus,
           }
-        : engineer,
-    ),
-  )
-}
+          : engineer,
+      ),
+    )
+  }
 
   const handleCreateProposalHistory = (proposalHistory: ProposalHistory) => {
-  createProposalHistory(proposalHistory)
+    createProposalHistory(proposalHistory)
 
-  syncStatusesByProposalHistory(proposalHistory)
+    syncStatusesByProposalHistory(proposalHistory)
 
-  setCurrentPage('proposals')
-  setIsCreatingProposalHistory(false)
-  setSelectedProjectId(null)
-  setCreatingProposal(null)
-  setSelectedProposalHistory(null)
-  setEditingProposalHistory(null)
-}
+    setCurrentPage('proposals')
+    setIsCreatingProposalHistory(false)
+    setSelectedProjectId(null)
+    setCreatingProposal(null)
+    setSelectedProposalHistory(null)
+    setEditingProposalHistory(null)
+  }
 
   const handleUpdateProposalHistory = (
-  updatedProposalHistory: ProposalHistory,
-) => {
-  updateProposalHistory(updatedProposalHistory)
+    updatedProposalHistory: ProposalHistory,
+  ) => {
+    updateProposalHistory(updatedProposalHistory)
 
-  syncStatusesByProposalHistory(updatedProposalHistory)
+    syncStatusesByProposalHistory(updatedProposalHistory)
 
-  setEditingProposalHistory(null)
-  setSelectedProposalHistory(null)
-  setCurrentPage('proposals')
-}
+    setEditingProposalHistory(null)
+    setSelectedProposalHistory(null)
+    setCurrentPage('proposals')
+  }
 
   const handleDeleteProposalHistory = (proposalHistoryId: number) => {
-  deleteProposalHistory(proposalHistoryId)
+    deleteProposalHistory(proposalHistoryId)
 
-  setSelectedProposalHistory(null)
-  setEditingProposalHistory(null)
-  setCurrentPage('proposals')
-}
+    setSelectedProposalHistory(null)
+    setEditingProposalHistory(null)
+    setCurrentPage('proposals')
+  }
 
-const handleRestoreProposalHistory = (proposalHistoryId: number) => {
-  restoreProposalHistory(proposalHistoryId)
+  const handleRestoreProposalHistory = (proposalHistoryId: number) => {
+    restoreProposalHistory(proposalHistoryId)
 
-  setCurrentPage('proposals')
-}
+    setCurrentPage('proposals')
+  }
 
   if (!currentUser) {
     if (authMode === 'register') {
@@ -433,11 +420,11 @@ const handleRestoreProposalHistory = (proposalHistoryId: number) => {
 
   return (
     <Layout
-  currentUser={currentUser}
-  currentPage={currentPage}
-  onChangePage={handleChangePage}
-  onLogout={handleLogout}
->
+      currentUser={currentUser}
+      currentPage={currentPage}
+      onChangePage={handleChangePage}
+      onLogout={handleLogout}
+    >
 
       {currentPage === 'top' && (
         <DashboardPage
@@ -457,15 +444,15 @@ const handleRestoreProposalHistory = (proposalHistoryId: number) => {
         selectedProjectId === null &&
         creatingProposal === null && (
           <ProjectListPage
-  currentUser={currentUser}
-  projects={projects}
-  onOpenCreate={() => setIsCreatingProject(true)}
-  onOpenDetail={(project) => setSelectedProject(project)}
-  onOpenEdit={(project) => setEditingProject(project)}
-  onOpenMatching={(projectId) => setSelectedProjectId(projectId)}
-  onDelete={handleDeleteProject}
-  onRestore={handleRestoreProject}
-/>
+            currentUser={currentUser}
+            projects={projects}
+            onOpenCreate={() => setIsCreatingProject(true)}
+            onOpenDetail={(project) => setSelectedProject(project)}
+            onOpenEdit={(project) => setEditingProject(project)}
+            onOpenMatching={(projectId) => setSelectedProjectId(projectId)}
+            onDelete={handleDeleteProject}
+            onRestore={handleRestoreProject}
+          />
         )}
 
       {currentPage === 'projects' && isCreatingProject && (
@@ -532,14 +519,14 @@ const handleRestoreProposalHistory = (proposalHistoryId: number) => {
         selectedEngineer === null &&
         editingEngineer === null && (
           <EngineerListPage
-  currentUser={currentUser}
-  engineers={engineers}
-  onOpenCreate={() => setIsCreatingEngineer(true)}
-  onOpenDetail={(engineer) => setSelectedEngineer(engineer)}
-  onOpenEdit={(engineer) => setEditingEngineer(engineer)}
-  onDelete={handleDeleteEngineer}
-  onRestore={handleRestoreEngineer}
-/>
+            currentUser={currentUser}
+            engineers={engineers}
+            onOpenCreate={() => setIsCreatingEngineer(true)}
+            onOpenDetail={(engineer) => setSelectedEngineer(engineer)}
+            onOpenEdit={(engineer) => setEditingEngineer(engineer)}
+            onDelete={handleDeleteEngineer}
+            onRestore={handleRestoreEngineer}
+          />
         )}
 
       {currentPage === 'engineers' && isCreatingEngineer && (
@@ -578,19 +565,19 @@ const handleRestoreProposalHistory = (proposalHistoryId: number) => {
 
       {currentPage === 'skills' && isCreatingSkill && (
         <SkillCreatePage
-  skills={skills}
-  onCreate={handleCreateSkill}
-  onCancel={() => setIsCreatingSkill(false)}
-/>
+          skills={skills}
+          onCreate={handleCreateSkill}
+          onCancel={() => setIsCreatingSkill(false)}
+        />
       )}
 
       {currentPage === 'skills' && editingSkill !== null && (
         <SkillEditPage
-  skill={editingSkill}
-  skills={skills}
-  onUpdate={handleUpdateSkill}
-  onCancel={() => setEditingSkill(null)}
-/>
+          skill={editingSkill}
+          skills={skills}
+          onUpdate={handleUpdateSkill}
+          onCancel={() => setEditingSkill(null)}
+        />
       )}
 
       {currentPage === 'proposals' &&
@@ -598,20 +585,20 @@ const handleRestoreProposalHistory = (proposalHistoryId: number) => {
         selectedProposalHistory === null &&
         editingProposalHistory === null && (
           <ProposalHistoryListPage
-  currentUser={currentUser}
-  proposalHistories={proposalHistories}
-  projects={projects}
-  engineers={engineers}
-  onOpenCreate={() => setIsCreatingProposalHistory(true)}
-  onShowDetail={(proposalHistory) =>
-    setSelectedProposalHistory(proposalHistory)
-  }
-  onEdit={(proposalHistory) =>
-    setEditingProposalHistory(proposalHistory)
-  }
-  onDelete={handleDeleteProposalHistory}
-  onRestore={handleRestoreProposalHistory}
-/>
+            currentUser={currentUser}
+            proposalHistories={proposalHistories}
+            projects={projects}
+            engineers={engineers}
+            onOpenCreate={() => setIsCreatingProposalHistory(true)}
+            onShowDetail={(proposalHistory) =>
+              setSelectedProposalHistory(proposalHistory)
+            }
+            onEdit={(proposalHistory) =>
+              setEditingProposalHistory(proposalHistory)
+            }
+            onDelete={handleDeleteProposalHistory}
+            onRestore={handleRestoreProposalHistory}
+          />
         )}
 
       {currentPage === 'proposals' && isCreatingProposalHistory && (
@@ -646,14 +633,14 @@ const handleRestoreProposalHistory = (proposalHistoryId: number) => {
         !isCreatingWorkRecord &&
         editingWorkRecord === null && (
           <WorkRecordListPage
-  workRecords={workRecords}
-  projects={projects}
-  engineers={engineers}
-  onOpenCreate={() => setIsCreatingWorkRecord(true)}
-  onOpenEdit={(workRecord) => setEditingWorkRecord(workRecord)}
-  onDelete={handleDeleteWorkRecord}
-  onRestore={handleRestoreWorkRecord}
-/>
+            workRecords={workRecords}
+            projects={projects}
+            engineers={engineers}
+            onOpenCreate={() => setIsCreatingWorkRecord(true)}
+            onOpenEdit={(workRecord) => setEditingWorkRecord(workRecord)}
+            onDelete={handleDeleteWorkRecord}
+            onRestore={handleRestoreWorkRecord}
+          />
         )}
 
       {currentPage === 'workRecords' && isCreatingWorkRecord && (
