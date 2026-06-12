@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import type { Project } from '../features/projects/projectTypes'
 import type { Skill } from '../features/skills/skillTypes'
 
-const API_BASE_URL = 'http://127.0.0.1:8000/api'
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
 
 type ApiProject = {
   id: number
