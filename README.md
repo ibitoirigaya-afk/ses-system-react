@@ -1,219 +1,270 @@
-# SES/BP営業管理システム DEMO
+# SES System React
 
-React + TypeScript + Vite + Tailwind CSS で作成した、SES/BP営業向けの営業管理システムDEMOです。
-
-案件管理、要員管理、スキル管理、マッチング、提案履歴、稼働実績、ロール別画面表示などを実装しています。
+SES/BP営業管理システムのフロントエンドです。
+React + TypeScript + Vite で構成し、Laravel API と接続しています。
 
 ## 使用技術
 
-- React
-- TypeScript
-- Vite
-- Tailwind CSS
-- localStorage
+* React
+* TypeScript
+* Vite
+* Tailwind CSS
+* Vitest
+* React Testing Library
+* Biome
+* Docker / Docker Compose
 
 ## 主な機能
 
-### 認証機能
+* ログイン画面
+* 新規登録画面
+* ロール別TOP画面
+* 案件管理
+* 要員管理
+* スキル管理
+* マッチング
+* 提案履歴管理
+* 稼働実績管理
+* 論理削除・復元
+* Laravel API連携
 
-- ログイン
-- 新規登録
-- ログアウト
-- パスワード入力
-- パスワード確認
-- メールアドレス形式チェック
-- ログイン状態の保持
+## ロール
 
-※ DEMO版のため、実際のAPI認証やDB保存は未実装です。
+### admin
 
-### ロール別機能
+管理者ユーザーです。
 
-このアプリでは、以下の3種類のロールを用意しています。
+* 案件管理
+* 要員管理
+* スキル管理
+* 提案履歴管理
+* 稼働実績管理
+* ダッシュボード表示
 
-#### 管理者
+### user
 
-- 案件管理
-- 要員管理
-- スキル管理
-- 提案履歴管理
-- 稼働実績管理
-- ダッシュボード確認
+要員担当ユーザーです。
 
-#### 要員担当
+* 案件一覧確認
+* 自分の要員管理
+* 提案履歴確認
 
-- 案件一覧の閲覧
-- 自分が登録した要員の管理
-- 自分の要員に関係する提案履歴の確認
+### company
 
-#### 企業担当
+企業ユーザーです。
 
-- 自社案件の管理
-- 自社案件に対するマッチング
-- 提案履歴の確認
+* 自社案件管理
+* 案件マッチング
+* 提案履歴確認
 
-## 実装済み機能
+## セットアップ
 
-### 案件管理
-
-- 案件一覧
-- 案件詳細
-- 案件登録
-- 案件編集
-- 案件削除
-- 案件検索
-- 必要スキル選択
-- 入力チェック
-
-### 要員管理
-
-- 要員一覧
-- 要員詳細
-- 要員登録
-- 要員編集
-- 要員削除
-- 保有スキル選択
-- 入力チェック
-
-### スキル管理
-
-- スキル一覧
-- スキル登録
-- スキル編集
-- スキル削除
-- 同名スキルの重複登録防止
-- 入力チェック
-
-### マッチング
-
-- 案件に必要なスキルと要員の保有スキルを比較
-- マッチ率を表示
-- マッチ率が高い順に表示
-- マッチング結果から提案履歴を作成
-
-### 提案履歴管理
-
-- 提案履歴一覧
-- 提案履歴詳細
-- 提案履歴登録
-- 提案履歴編集
-- 提案履歴削除
-- 新着順 / 古い順 / 面談日が近い順の並び替え
-- ステータス絞り込み
-- 入力チェック
-
-### 稼働実績管理
-
-- 稼働実績一覧
-- 稼働実績登録
-- 稼働実績編集
-- 稼働実績削除
-- 粗利自動計算
-- 入力チェック
-
-### ダッシュボード
-
-ロールごとに表示内容を切り替えています。
-
-- 管理者TOP
-- 要員担当TOP
-- 企業担当TOP
-
-## DEMOログイン情報
-
-以下のユーザーでログインできます。
-
-| ロール | メールアドレス | パスワード |
-|---|---|---|
-| 管理者 | admin@example.com | password |
-| 要員担当 | user@example.com | password |
-| 企業担当 | company@example.com | password |
-
-## 起動方法
-
-### 1. リポジトリをクローン
-
-```bash
-git clone リポジトリURL
-
-### 2. プロジェクトフォルダへ移動
-
-```bash
-cd ses-system-react
-```
-
-### 3. パッケージをインストール
+### 1. パッケージをインストール
 
 ```bash
 npm install
 ```
 
-### 4. 開発サーバーを起動
+### 2. 環境変数ファイルを作成
+
+```bash
+cp .env.example .env
+```
+
+`.env` の内容：
+
+```env
+VITE_API_BASE_URL=http://127.0.0.1:8000/api
+```
+
+### 3. 開発サーバー起動
 
 ```bash
 npm run dev
 ```
 
-ブラウザで表示されたURLを開きます。
-
-例：
-
-```bash
-http://localhost:5173
-```
-
-## データ保存について
-
-このDEMO版では、データ保存に `localStorage` を使用しています。
-
-保存対象：
-
-- ユーザー
-- 案件
-- 要員
-- スキル
-- 提案履歴
-- 稼働実績
-- ログイン中ユーザー
-
-そのため、ブラウザをリロードしてもデータは残ります。
-
-ただし、別ブラウザや別端末では共有されません。
-
-## 現在の保存キー
+起動URL：
 
 ```txt
-ses-users
-ses-current-user-id
-ses-projects
-ses-engineers
-ses-skills
-ses-proposal-histories
-ses-work-records
+http://127.0.0.1:5173
 ```
 
-## 今後の改善予定
+## Dockerで起動
 
-- React Router の導入
-- Laravel API または Node.js API との連携
-- DB保存対応
-- 本格的な認証機能
-- パスワードハッシュ化
-- サーバー側バリデーション
-- 詳細画面のデザイン改善
-- 稼働実績の月別集計
-- CSV出力
-- テスト追加
+```bash
+docker compose up --build
+```
 
-## 注意点
+バックグラウンドで起動する場合：
 
-このアプリは学習・DEMO用途で作成しています。
+```bash
+docker compose up -d
+```
 
-本番利用する場合は、以下の対応が必要です。
+停止：
 
-- API連携
-- DB保存
-- 認証認可の強化
-- パスワードの安全な管理
-- バリデーションのサーバー側実装
-- エラーハンドリング
-- セキュリティ対策
+```bash
+docker compose down
+```
+
+## Makefile コマンド
+
+### パッケージインストール
+
+```bash
+make install
+```
+
+### 開発サーバー起動
+
+```bash
+make dev
+```
+
+### ビルド
+
+```bash
+make build
+```
+
+### Biomeチェック
+
+```bash
+make lint
+```
+
+### Biome自動整形
+
+```bash
+make format
+```
+
+### Biomeチェック + 自動修正
+
+```bash
+make check
+```
+
+### テスト実行
+
+```bash
+make test
+```
+
+### プレビュー起動
+
+```bash
+make preview
+```
+
+### Docker起動
+
+```bash
+make docker-up
+```
+
+### Docker停止
+
+```bash
+make docker-down
+```
+
+### Dockerビルド起動
+
+```bash
+make docker-build
+```
+
+## テスト
+
+Vitest + React Testing Library を使用しています。
+
+```bash
+make test
+```
+
+または：
+
+```bash
+npm run test
+```
+
+テスト対象：
+
+* StatusBadge
+* ProjectForm
+* EngineerForm
+
+確認内容：
+
+* ステータス表示
+* フォーム表示
+* 入力後の送信処理
+* キャンセル処理
+
+## Biome
+
+コード整形・Lintに Biome を使用しています。
+
+チェック：
+
+```bash
+make lint
+```
+
+自動整形：
+
+```bash
+make format
+```
+
+自動修正込みチェック：
+
+```bash
+make check
+```
+
+## Laravel APIとの接続
+
+APIの接続先は `.env` で管理しています。
+
+```env
+VITE_API_BASE_URL=http://127.0.0.1:8000/api
+```
+
+API側は以下のリポジトリで管理しています。
+
+```txt
+ses-system-api
+```
+
+## 実装済み画面
+
+* LoginPage
+* RegisterPage
+* Dashboard
+* ProjectListPage
+* ProjectCreatePage
+* ProjectEditPage
+* ProjectDetailPage
+* EngineerListPage
+* EngineerCreatePage
+* EngineerEditPage
+* EngineerDetailPage
+* SkillListPage
+* ProposalHistoryListPage
+* ProposalHistoryCreatePage
+* ProposalHistoryEditPage
+* WorkRecordListPage
+* WorkRecordCreatePage
+* WorkRecordEditPage
+
+## 補足
+
+このアプリは、SES/BP営業で使う以下の業務を想定しています。
+
+* 案件情報の管理
+* 要員情報の管理
+* 案件と要員のスキルマッチング
+* 提案履歴の管理
+* 稼働実績・売上・粗利の管理
