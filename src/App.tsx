@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
 import Layout from "./components/Layout";
-import { STORAGE_KEYS } from "./constants/storageKeys";
 import type { User } from "./features/auth/authTypes";
 import LoginPage from "./features/auth/LoginPage";
 import RegisterPage from "./features/auth/RegisterPage";
@@ -40,7 +39,6 @@ import {
 	getEngineerStatusByProposalStatus,
 	getProjectStatusByProposalStatus,
 } from "./utils/proposalStatusSync";
-import { loadFromStorage, saveToStorage } from "./utils/storage";
 
 type Page =
 	| "top"
@@ -115,15 +113,7 @@ export default function App() {
 
 	const { users, currentUser, login, register, logout } = useAuthUsers();
 
-	const [currentPage, setCurrentPage] = useState<Page>(() => {
-		const hashPage = getPageFromHash();
-
-		if (hashPage !== "top") {
-			return hashPage;
-		}
-
-		return loadFromStorage(STORAGE_KEYS.currentPage, "top");
-	});
+	const [currentPage, setCurrentPage] = useState<Page>(() => getPageFromHash());
 
 	const [isCreatingProject, setIsCreatingProject] = useState(false);
 	const [selectedProject, setSelectedProject] = useState<Project | null>(null);
@@ -157,10 +147,6 @@ export default function App() {
 
 	const [isCreatingProposalHistory, setIsCreatingProposalHistory] =
 		useState(false);
-
-	useEffect(() => {
-		saveToStorage("ses-current-page", currentPage);
-	}, [currentPage]);
 
 	const resetPageState = useCallback(() => {
 		setIsCreatingProject(false);
