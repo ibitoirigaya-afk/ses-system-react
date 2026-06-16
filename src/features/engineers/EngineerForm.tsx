@@ -130,6 +130,11 @@ export default function EngineerForm({
 			return;
 		}
 
+		if (desiredConditions.trim() === "") {
+			alert("希望条件を入力してください。");
+			return;
+		}
+
 		if (careerSummary.trim() === "") {
 			alert("経歴概要を入力してください。");
 			return;

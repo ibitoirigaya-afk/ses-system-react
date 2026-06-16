@@ -1,34 +1,44 @@
-.PHONY: install dev build lint format check test preview docker-up docker-down docker-build
+.PHONY: install up down build restart logs shell test lint format check preview clean
+
+COMPOSE=docker compose
+SERVICE=react
 
 install:
 	npm install
 
-dev:
-	npm run dev
+up:
+	$(COMPOSE) up -d
+
+down:
+	$(COMPOSE) down
 
 build:
-	npm run build
+	$(COMPOSE) up -d --build
 
-lint:
-	npm run lint
+restart:
+	$(COMPOSE) down
+	$(COMPOSE) up -d
 
-format:
-	npm run format
+logs:
+	$(COMPOSE) logs -f
 
-check:
-	npm run check
+shell:
+	$(COMPOSE) exec $(SERVICE) sh
 
 test:
-	npm run test
+	$(COMPOSE) exec $(SERVICE) npm run test
+
+lint:
+	$(COMPOSE) exec $(SERVICE) npm run lint
+
+format:
+	$(COMPOSE) exec $(SERVICE) npm run format
+
+check:
+	$(COMPOSE) exec $(SERVICE) npm run check
 
 preview:
-	npm run preview
+	$(COMPOSE) exec $(SERVICE) npm run preview
 
-docker-up:
-	docker compose up
-
-docker-down:
-	docker compose down
-
-docker-build:
-	docker compose up --build
+clean:
+	$(COMPOSE) down -v
