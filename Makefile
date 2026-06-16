@@ -1,10 +1,7 @@
-.PHONY: install up down build restart logs shell test lint format check preview clean
+.PHONY: up down build restart logs ps shell install test lint format check
 
 COMPOSE=docker compose
 SERVICE=react
-
-install:
-	npm install
 
 up:
 	$(COMPOSE) up -d
@@ -22,8 +19,14 @@ restart:
 logs:
 	$(COMPOSE) logs -f
 
+ps:
+	$(COMPOSE) ps
+
 shell:
 	$(COMPOSE) exec $(SERVICE) sh
+
+install:
+	$(COMPOSE) exec $(SERVICE) npm install
 
 test:
 	$(COMPOSE) exec $(SERVICE) npm run test
@@ -36,9 +39,3 @@ format:
 
 check:
 	$(COMPOSE) exec $(SERVICE) npm run check
-
-preview:
-	$(COMPOSE) exec $(SERVICE) npm run preview
-
-clean:
-	$(COMPOSE) down -v
