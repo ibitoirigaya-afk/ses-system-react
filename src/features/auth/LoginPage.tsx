@@ -3,7 +3,7 @@ import type { User } from "./authTypes";
 
 type Props = {
 	users: User[];
-	onLogin: (userId: number) => void;
+	onLogin: (email: string, password: string) => Promise<boolean>;
 	onOpenRegister: () => void;
 };
 
@@ -11,17 +11,22 @@ export default function LoginPage({ users, onLogin, onOpenRegister }: Props) {
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
 
-	const handleLogin = () => {
-		const user = users.find(
-			(user) => user.email === email && user.password === password,
-		);
-
-		if (!user) {
-			alert("メールアドレスまたはパスワードが違います。");
+	const handleLogin = async () => {
+		if (email.trim() === "") {
+			alert("メールアドレスを入力してください。");
 			return;
 		}
 
-		onLogin(user.id);
+		if (password.trim() === "") {
+			alert("パスワードを入力してください。");
+			return;
+		}
+
+		const isSuccess = await onLogin(email, password);
+
+		if (!isSuccess) {
+			alert("メールアドレスまたはパスワードが違います。");
+		}
 	};
 
 	return (

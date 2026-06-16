@@ -195,12 +195,18 @@ export default function App() {
 		}
 	};
 
-	const handleLogin = (userId: number) => {
-		login(userId);
+	const handleLogin = async (email: string, password: string) => {
+		const isSuccess = await login(email, password);
+
+		if (!isSuccess) {
+			return false;
+		}
 
 		setCurrentPage("top");
 		resetPageState();
 		window.history.replaceState({ page: "top" }, "", "#top");
+
+		return true;
 	};
 
 	const handleRegister = (user: User) => {
@@ -211,8 +217,8 @@ export default function App() {
 		window.history.replaceState({ page: "top" }, "", "#top");
 	};
 
-	const handleLogout = () => {
-		logout();
+	const handleLogout = async () => {
+		await logout();
 
 		setAuthMode("login");
 		setCurrentPage("top");
