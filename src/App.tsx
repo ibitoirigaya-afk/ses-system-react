@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Layout from "./components/Layout";
 import { STORAGE_KEYS } from "./constants/storageKeys";
 import type { User } from "./features/auth/authTypes";
@@ -57,6 +57,23 @@ type CreatingProposal = {
 	engineerId: number;
 };
 
+const getPageFromHash = (): Page => {
+	const hashPage = window.location.hash.replace("#", "");
+
+	if (
+		hashPage === "top" ||
+		hashPage === "projects" ||
+		hashPage === "engineers" ||
+		hashPage === "skills" ||
+		hashPage === "proposals" ||
+		hashPage === "workRecords"
+	) {
+		return hashPage;
+	}
+
+	return "top";
+};
+
 export default function App() {
 	const [authMode, setAuthMode] = useState<AuthMode>("login");
 
@@ -98,9 +115,15 @@ export default function App() {
 
 	const { users, currentUser, login, register, logout } = useAuthUsers();
 
-	const [currentPage, setCurrentPage] = useState<Page>(() =>
-		loadFromStorage(STORAGE_KEYS.currentPage, "top"),
-	);
+	const [currentPage, setCurrentPage] = useState<Page>(() => {
+		const hashPage = getPageFromHash();
+
+		if (hashPage !== "top") {
+			return hashPage;
+		}
+
+		return loadFromStorage(STORAGE_KEYS.currentPage, "top");
+	});
 
 	const [isCreatingProject, setIsCreatingProject] = useState(false);
 	const [selectedProject, setSelectedProject] = useState<Project | null>(null);
@@ -139,7 +162,7 @@ export default function App() {
 		saveToStorage("ses-current-page", currentPage);
 	}, [currentPage]);
 
-	const resetPageState = () => {
+	const resetPageState = useCallback(() => {
 		setIsCreatingProject(false);
 		setSelectedProject(null);
 		setEditingProject(null);
@@ -160,11 +183,30 @@ export default function App() {
 		setCreatingProposal(null);
 		setSelectedProposalHistory(null);
 		setEditingProposalHistory(null);
-	};
+	}, []);
+
+	useEffect(() => {
+		const handlePopState = () => {
+			const page = getPageFromHash();
+
+			setCurrentPage(page);
+			resetPageState();
+		};
+
+		window.addEventListener("popstate", handlePopState);
+
+		return () => {
+			window.removeEventListener("popstate", handlePopState);
+		};
+	}, [resetPageState]);
 
 	const handleChangePage = (page: Page) => {
 		setCurrentPage(page);
 		resetPageState();
+
+		if (window.location.hash !== `#${page}`) {
+			window.history.pushState({ page }, "", `#${page}`);
+		}
 	};
 
 	const handleLogin = (userId: number) => {
@@ -172,6 +214,7 @@ export default function App() {
 
 		setCurrentPage("top");
 		resetPageState();
+		window.history.replaceState({ page: "top" }, "", "#top");
 	};
 
 	const handleRegister = (user: User) => {
@@ -179,6 +222,7 @@ export default function App() {
 
 		setCurrentPage("top");
 		resetPageState();
+		window.history.replaceState({ page: "top" }, "", "#top");
 	};
 
 	const handleLogout = () => {
@@ -187,6 +231,7 @@ export default function App() {
 		setAuthMode("login");
 		setCurrentPage("top");
 		resetPageState();
+		window.history.replaceState({ page: "top" }, "", "#top");
 	};
 
 	const handleCreateProject = (project: Project) => {
