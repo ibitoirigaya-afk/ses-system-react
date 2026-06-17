@@ -111,7 +111,7 @@ export default function App() {
 		restoreProposalHistory,
 	} = useProposalHistories();
 
-	const { users, currentUser, login, register, logout } = useAuthUsers();
+	const { currentUser, login, register, logout } = useAuthUsers();
 
 	const [currentPage, setCurrentPage] = useState<Page>(() => getPageFromHash());
 
@@ -209,12 +209,24 @@ export default function App() {
 		return true;
 	};
 
-	const handleRegister = (user: User) => {
-		register(user);
+	const handleRegister = async (input: {
+		name: string;
+		email: string;
+		password: string;
+		passwordConfirm: string;
+		role: User["role"];
+	}) => {
+		const isSuccess = await register(input);
+
+		if (!isSuccess) {
+			return false;
+		}
 
 		setCurrentPage("top");
 		resetPageState();
 		window.history.replaceState({ page: "top" }, "", "#top");
+
+		return true;
 	};
 
 	const handleLogout = async () => {
@@ -423,7 +435,6 @@ export default function App() {
 		if (authMode === "register") {
 			return (
 				<RegisterPage
-					users={users}
 					onRegister={handleRegister}
 					onBackToLogin={() => setAuthMode("login")}
 				/>
@@ -432,9 +443,8 @@ export default function App() {
 
 		return (
 			<LoginPage
-				users={users}
 				onLogin={handleLogin}
-				onOpenRegister={() => setAuthMode("register")}
+				onChangeToRegister={() => setAuthMode("register")}
 			/>
 		);
 	}

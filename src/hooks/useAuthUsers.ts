@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { STORAGE_KEYS } from "../constants/storageKeys";
-import { mockUsers } from "../data/mockUsers";
-import type { User } from "../features/auth/authTypes";
+import type { User, UserRole } from "../features/auth/authTypes";
 import {
 	loadFromStorage,
 	removeFromStorage,
@@ -13,6 +12,14 @@ type ApiUser = {
 	name: string;
 	email: string;
 	role: User["role"];
+};
+
+type RegisterInput = {
+	name: string;
+	email: string;
+	password: string;
+	passwordConfirm: string;
+	role: UserRole;
 };
 
 const API_BASE_URL =
@@ -29,19 +36,11 @@ const convertApiUserToUser = (apiUser: ApiUser): User => {
 };
 
 export function useAuthUsers() {
-	const [users, setUsers] = useState<User[]>(() =>
-		loadFromStorage(STORAGE_KEYS.users, mockUsers),
-	);
-
 	const [currentUser, setCurrentUser] = useState<User | undefined>(undefined);
 
 	const [currentUserId, setCurrentUserId] = useState<number | null>(() =>
 		loadFromStorage(STORAGE_KEYS.currentUserId, null),
 	);
-
-	useEffect(() => {
-		saveToStorage(STORAGE_KEYS.users, users);
-	}, [users]);
 
 	useEffect(() => {
 		const fetchCurrentUser = async () => {
@@ -104,10 +103,37 @@ export function useAuthUsers() {
 		}
 	};
 
-	const register = (user: User) => {
-		setUsers((prev) => [user, ...prev]);
-		setCurrentUser(user);
-		setCurrentUserId(user.id);
+	const register = async (input: RegisterInput) => {
+		try {
+			const response = await fetch(`${API_BASE_URL}/register`, {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({
+					name: input.name,
+					email: input.email,
+					password: input.password,
+					password_confirmation: input.passwordConfirm,
+					role: input.role,
+				}),
+			});
+
+			if (!response.ok) {
+				return false;
+			}
+
+			const data: { user: ApiUser } = await response.json();
+			const user = convertApiUserToUser(data.user);
+
+			setCurrentUser(user);
+			setCurrentUserId(user.id);
+			saveToStorage(STORAGE_KEYS.currentUserId, user.id);
+
+			return true;
+		} catch {
+			return false;
+		}
 	};
 
 	const logout = async () => {
@@ -123,7 +149,6 @@ export function useAuthUsers() {
 	};
 
 	return {
-		users,
 		currentUser,
 		currentUserId,
 		login,

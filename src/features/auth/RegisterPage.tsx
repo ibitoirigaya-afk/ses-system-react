@@ -1,17 +1,20 @@
 import { useState } from "react";
-import type { User, UserRole } from "./authTypes";
+import type { UserRole } from "./authTypes";
+
+type RegisterInput = {
+	name: string;
+	email: string;
+	password: string;
+	passwordConfirm: string;
+	role: UserRole;
+};
 
 type Props = {
-	users: User[];
-	onRegister: (user: User) => void;
+	onRegister: (input: RegisterInput) => Promise<boolean>;
 	onBackToLogin: () => void;
 };
 
-export default function RegisterPage({
-	users,
-	onRegister,
-	onBackToLogin,
-}: Props) {
+export default function RegisterPage({ onRegister, onBackToLogin }: Props) {
 	const [name, setName] = useState("");
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
@@ -22,7 +25,7 @@ export default function RegisterPage({
 		return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 	};
 
-	const handleRegister = () => {
+	const handleRegister = async () => {
 		if (name.trim() === "") {
 			alert("名前を入力してください。");
 			return;
@@ -58,22 +61,19 @@ export default function RegisterPage({
 			return;
 		}
 
-		const exists = users.some((user) => user.email === email);
-
-		if (exists) {
-			alert("このメールアドレスはすでに登録されています。");
-			return;
-		}
-
-		const newUser: User = {
-			id: Date.now(),
+		const success = await onRegister({
 			name,
 			email,
 			password,
+			passwordConfirm,
 			role,
-		};
+		});
 
-		onRegister(newUser);
+		if (!success) {
+			alert(
+				"新規登録に失敗しました。メールアドレスがすでに使われている可能性があります。",
+			);
+		}
 	};
 
 	return (
@@ -83,7 +83,7 @@ export default function RegisterPage({
 					<h1 className="text-2xl font-bold text-gray-900">新規登録</h1>
 
 					<p className="mt-2 text-sm text-gray-500">
-						DEMO用のユーザーを作成します。
+						ユーザー情報を登録します。
 					</p>
 				</div>
 

@@ -1,13 +1,11 @@
 import { useState } from "react";
-import type { User } from "./authTypes";
 
 type Props = {
-	users: User[];
 	onLogin: (email: string, password: string) => Promise<boolean>;
-	onOpenRegister: () => void;
+	onChangeToRegister: () => void;
 };
 
-export default function LoginPage({ users, onLogin, onOpenRegister }: Props) {
+export default function LoginPage({ onLogin, onChangeToRegister }: Props) {
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
 
@@ -77,7 +75,8 @@ export default function LoginPage({ users, onLogin, onOpenRegister }: Props) {
 					</button>
 
 					<button
-						onClick={onOpenRegister}
+						type="button"
+						onClick={onChangeToRegister}
 						className="rounded bg-gray-100 px-4 py-2 text-sm font-bold text-gray-700"
 					>
 						新規登録はこちら
@@ -88,11 +87,9 @@ export default function LoginPage({ users, onLogin, onOpenRegister }: Props) {
 					<p className="font-bold">DEMOログイン例</p>
 
 					<ul className="mt-2 list-inside list-disc">
-						{users.map((user) => (
-							<li key={user.id}>
-								{user.name}：{user.email} / password
-							</li>
-						))}
+						<li>管理者：admin@example.com / password</li>
+						<li>要員担当：user@example.com / password</li>
+						<li>企業担当：company@example.com / password</li>
 					</ul>
 				</div>
 			</div>
