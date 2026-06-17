@@ -1,6 +1,6 @@
 # SES System React
 
-SES/BP営業管理システムのフロントエンドです。  
+SES/BP営業管理システムのフロントエンドです。
 React + TypeScript + Vite で構成し、Laravel API と接続しています。
 
 ## 使用技術
@@ -78,6 +78,7 @@ http://localhost:8000/api/skills
 * 稼働実績管理
 * 論理削除
 * 復元
+* ブラウザ戻る対応
 * Laravel API連携
 
 ## 認証機能
@@ -95,8 +96,10 @@ POST /api/logout
 
 現在は学習・開発用の簡易認証です。
 
-ログイン状態の維持には、React側で `currentUserId` のみ localStorage に保存しています。  
+ログイン状態の維持には、React側で `currentUserId` のみ localStorage に保存しています。
 ページ更新時は `/api/me?user_id=...` を呼び出してログイン中ユーザーを復元します。
+
+認証復元中は「読み込み中...」を表示し、ページ更新時にログイン画面が一瞬表示されないようにしています。
 
 本格運用する場合は、Laravel Sanctum やトークン認証への変更を想定しています。
 
@@ -194,19 +197,34 @@ mockEngineers
 mockSkills
 ```
 
-また、案件・要員・スキル・提案履歴・稼働実績の保存は localStorage ではなく Laravel API を使用しています。
+案件・要員・スキル・提案履歴・稼働実績の保存は localStorage ではなく Laravel API を使用しています。
 
 残っている localStorage は、ログイン状態維持用の `currentUserId` のみです。
 
+## ブラウザ戻る対応
+
+ブラウザの戻るボタンで、以下のような画面内遷移も1つ前に戻れるように対応しています。
+
+* 案件一覧 → 新規作成 / 詳細 / 編集 / マッチング
+* マッチング → 提案作成
+* 要員一覧 → 新規作成 / 詳細 / 編集
+* スキル一覧 → 新規作成 / 編集
+* 提案履歴一覧 → 新規作成 / 詳細 / 編集
+* 稼働実績一覧 → 新規作成 / 編集
+
+ログアウト時は履歴をリセットし、ブラウザ戻るで管理画面へ戻らないようにしています。
+
 ## セットアップ
 
-### 1. パッケージをインストール
+React側を起動する前に、API側 `ses-system-api` も起動しておく必要があります。
 
-```bash
-npm install
+API側起動URL：
+
+```txt
+http://localhost:8000
 ```
 
-### 2. 環境変数ファイルを作成
+### 1. 環境変数ファイルを作成
 
 ```bash
 cp .env.example .env
@@ -218,37 +236,63 @@ cp .env.example .env
 VITE_API_BASE_URL=http://localhost:8000/api
 ```
 
-または：
-
-```env
-VITE_API_BASE_URL=http://127.0.0.1:8000/api
-```
-
-### 3. 開発サーバー起動
+### 2. Dockerで起動
 
 ```bash
-npm run dev
+make build
 ```
 
-起動URL：
+または：
+
+```bash
+docker compose up -d --build
+```
+
+### 3. 起動確認
 
 ```txt
 http://localhost:5173
 ```
 
-## Dockerで起動
+### 4. コンテナ状態確認
 
 ```bash
-docker compose up --build
+make ps
 ```
 
-バックグラウンドで起動する場合：
+## Dockerで起動・停止
+
+### 起動
+
+```bash
+make up
+```
+
+または：
 
 ```bash
 docker compose up -d
 ```
 
-停止：
+### ビルドして起動
+
+```bash
+make build
+```
+
+または：
+
+```bash
+docker compose up -d --build
+```
+
+### 停止
+
+```bash
+make down
+```
+
+または：
 
 ```bash
 docker compose down
@@ -256,22 +300,58 @@ docker compose down
 
 ## Makefile コマンド
 
+### Docker起動
+
+```bash
+make up
+```
+
+### Docker停止
+
+```bash
+make down
+```
+
+### Dockerビルド起動
+
+```bash
+make build
+```
+
+### Docker再起動
+
+```bash
+make restart
+```
+
+### ログ確認
+
+```bash
+make logs
+```
+
+### コンテナ状態確認
+
+```bash
+make ps
+```
+
+### Reactコンテナに入る
+
+```bash
+make shell
+```
+
 ### パッケージインストール
 
 ```bash
 make install
 ```
 
-### 開発サーバー起動
+### テスト実行
 
 ```bash
-make dev
-```
-
-### ビルド / Docker再ビルド起動
-
-```bash
-make build
+make test
 ```
 
 ### Biomeチェック
@@ -292,48 +372,12 @@ make format
 make check
 ```
 
-### テスト実行
-
-```bash
-make test
-```
-
-### プレビュー起動
-
-```bash
-make preview
-```
-
-### Docker起動
-
-```bash
-make docker-up
-```
-
-### Docker停止
-
-```bash
-make docker-down
-```
-
-### Dockerビルド起動
-
-```bash
-make docker-build
-```
-
 ## テスト
 
 Vitest + React Testing Library を使用しています。
 
 ```bash
 make test
-```
-
-または：
-
-```bash
-npm run test
 ```
 
 テスト対象：
@@ -412,7 +456,9 @@ git status
 主要CRUDのAPI化
 mockデータ撤去
 localStorage保存の整理
-ブラウザバック対応
+ブラウザ戻る対応
+ログアウト時の履歴リセット
+認証復元中のローディング表示
 format / lint / test 通過
 Docker起動確認
 ```
@@ -422,6 +468,7 @@ Docker起動確認
 * Laravel Sanctum などを使った本格認証
 * APIエラー表示の改善
 * ローディング表示の追加
-* 画面内詳細遷移のブラウザバック対応
 * E2Eテスト追加
-* READMEのAPI側リンク追記
+* APIレスポンス形式の統一
+* roleごとの認可強化
+* READMEの継続更新
