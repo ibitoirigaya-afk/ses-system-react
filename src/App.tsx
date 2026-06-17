@@ -441,28 +441,37 @@ export default function App() {
 		moveToViewState(createBaseViewState("engineers"));
 	};
 
-	const handleCreateSkill = (skill: Skill) => {
-		createSkill(skill);
+	const handleCreateSkill = async (skill: Skill) => {
+		const result = await createSkill(skill);
 
-		setIsCreatingSkill(false);
-		setEditingSkill(null);
-		setCurrentPage("skills");
+		if (!result.success) {
+			alert(result.message ?? "スキルの登録に失敗しました。");
+			return;
+		}
+
+		moveToViewState(createBaseViewState("skills"));
 	};
 
-	const handleUpdateSkill = (updatedSkill: Skill) => {
-		updateSkill(updatedSkill);
+	const handleUpdateSkill = async (updatedSkill: Skill) => {
+		const result = await updateSkill(updatedSkill);
 
-		setIsCreatingSkill(false);
-		setEditingSkill(null);
-		setCurrentPage("skills");
+		if (!result.success) {
+			alert(result.message ?? "スキルの更新に失敗しました。");
+			return;
+		}
+
+		moveToViewState(createBaseViewState("skills"));
 	};
 
-	const handleDeleteSkill = (skillId: number) => {
-		deleteSkill(skillId);
+	const handleDeleteSkill = async (skillId: number) => {
+		const result = await deleteSkill(skillId);
 
-		setIsCreatingSkill(false);
-		setEditingSkill(null);
-		setCurrentPage("skills");
+		if (!result.success) {
+			alert(result.message ?? "スキルの削除に失敗しました。");
+			return;
+		}
+
+		moveToViewState(createBaseViewState("skills"));
 	};
 
 	const handleCreateWorkRecord = (workRecord: WorkRecord) => {

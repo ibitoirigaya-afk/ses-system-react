@@ -4,6 +4,11 @@ import type { Skill } from "../features/skills/skillTypes";
 const API_BASE_URL =
 	import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000/api";
 
+type ApiActionResult = {
+	success: boolean;
+	message?: string;
+};
+
 export function useSkills() {
 	const [skills, setSkills] = useState<Skill[]>([]);
 	const [isLoadingSkills, setIsLoadingSkills] = useState(true);
@@ -34,7 +39,7 @@ export function useSkills() {
 		fetchSkills();
 	}, []);
 
-	const createSkill = async (skill: Skill) => {
+	const createSkill = async (skill: Skill): Promise<ApiActionResult> => {
 		try {
 			setSkillError("");
 
@@ -58,15 +63,26 @@ export function useSkills() {
 			const createdSkill: Skill = await response.json();
 
 			setSkills((prev) => [createdSkill, ...prev]);
+
+			return {
+				success: true,
+			};
 		} catch (error) {
 			console.error(error);
-			setSkillError(
-				error instanceof Error ? error.message : "スキルの登録に失敗しました。",
-			);
+
+			const message =
+				error instanceof Error ? error.message : "スキルの登録に失敗しました。";
+
+			setSkillError(message);
+
+			return {
+				success: false,
+				message,
+			};
 		}
 	};
 
-	const updateSkill = async (updatedSkill: Skill) => {
+	const updateSkill = async (updatedSkill: Skill): Promise<ApiActionResult> => {
 		try {
 			setSkillError("");
 
@@ -95,15 +111,26 @@ export function useSkills() {
 			setSkills((prev) =>
 				prev.map((skill) => (skill.id === savedSkill.id ? savedSkill : skill)),
 			);
+
+			return {
+				success: true,
+			};
 		} catch (error) {
 			console.error(error);
-			setSkillError(
-				error instanceof Error ? error.message : "スキルの更新に失敗しました。",
-			);
+
+			const message =
+				error instanceof Error ? error.message : "スキルの更新に失敗しました。";
+
+			setSkillError(message);
+
+			return {
+				success: false,
+				message,
+			};
 		}
 	};
 
-	const deleteSkill = async (skillId: number) => {
+	const deleteSkill = async (skillId: number): Promise<ApiActionResult> => {
 		try {
 			setSkillError("");
 
@@ -118,11 +145,22 @@ export function useSkills() {
 			}
 
 			setSkills((prev) => prev.filter((skill) => skill.id !== skillId));
+
+			return {
+				success: true,
+			};
 		} catch (error) {
 			console.error(error);
-			setSkillError(
-				error instanceof Error ? error.message : "スキルの削除に失敗しました。",
-			);
+
+			const message =
+				error instanceof Error ? error.message : "スキルの削除に失敗しました。";
+
+			setSkillError(message);
+
+			return {
+				success: false,
+				message,
+			};
 		}
 	};
 
