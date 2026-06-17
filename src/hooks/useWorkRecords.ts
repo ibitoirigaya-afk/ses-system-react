@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import type { WorkRecord } from "../features/workRecords/workRecordTypes";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+const API_BASE_URL =
+	import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000/api";
 
 type ApiWorkRecord = {
 	id: number;

@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import type { ProposalHistory } from "../features/proposals/proposalTypes";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+const API_BASE_URL =
+	import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000/api";
 
 type ApiProposalHistory = {
 	id: number;
