@@ -397,37 +397,48 @@ export default function App() {
 		moveToViewState(createBaseViewState("projects"));
 	};
 
-	const handleCreateEngineer = (engineer: Engineer) => {
-		createEngineer(engineer);
+	const handleCreateEngineer = async (engineer: Engineer) => {
+		const result = await createEngineer(engineer);
 
-		setIsCreatingEngineer(false);
-		setSelectedEngineer(null);
-		setEditingEngineer(null);
-		setCurrentPage("engineers");
+		if (!result.success) {
+			alert(result.message ?? "要員の登録に失敗しました。");
+			return;
+		}
+
+		moveToViewState(createBaseViewState("engineers"));
 	};
 
-	const handleUpdateEngineer = (updatedEngineer: Engineer) => {
-		updateEngineer(updatedEngineer);
+	const handleUpdateEngineer = async (updatedEngineer: Engineer) => {
+		const result = await updateEngineer(updatedEngineer);
 
-		setIsCreatingEngineer(false);
-		setSelectedEngineer(null);
-		setEditingEngineer(null);
-		setCurrentPage("engineers");
+		if (!result.success) {
+			alert(result.message ?? "要員の更新に失敗しました。");
+			return;
+		}
+
+		moveToViewState(createBaseViewState("engineers"));
 	};
 
-	const handleDeleteEngineer = (engineerId: number) => {
-		deleteEngineer(engineerId);
+	const handleDeleteEngineer = async (engineerId: number) => {
+		const result = await deleteEngineer(engineerId);
 
-		setIsCreatingEngineer(false);
-		setSelectedEngineer(null);
-		setEditingEngineer(null);
-		setCurrentPage("engineers");
+		if (!result.success) {
+			alert(result.message ?? "要員の削除に失敗しました。");
+			return;
+		}
+
+		moveToViewState(createBaseViewState("engineers"));
 	};
 
-	const handleRestoreEngineer = (engineerId: number) => {
-		restoreEngineer(engineerId);
+	const handleRestoreEngineer = async (engineerId: number) => {
+		const result = await restoreEngineer(engineerId);
 
-		setCurrentPage("engineers");
+		if (!result.success) {
+			alert(result.message ?? "要員の復元に失敗しました。");
+			return;
+		}
+
+		moveToViewState(createBaseViewState("engineers"));
 	};
 
 	const handleCreateSkill = (skill: Skill) => {

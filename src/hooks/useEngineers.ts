@@ -26,6 +26,11 @@ type ApiEngineer = {
 	skills: Skill[];
 };
 
+type ApiActionResult = {
+	success: boolean;
+	message?: string;
+};
+
 const convertApiEngineerToEngineer = (apiEngineer: ApiEngineer): Engineer => {
 	return {
 		id: apiEngineer.id,
@@ -79,7 +84,9 @@ export function useEngineers() {
 		fetchEngineers();
 	}, []);
 
-	const createEngineer = async (engineer: Engineer) => {
+	const createEngineer = async (
+		engineer: Engineer,
+	): Promise<ApiActionResult> => {
 		try {
 			setEngineerError("");
 
@@ -116,15 +123,28 @@ export function useEngineers() {
 			const convertedEngineer = convertApiEngineerToEngineer(createdEngineer);
 
 			setEngineers((prev) => [convertedEngineer, ...prev]);
+
+			return {
+				success: true,
+			};
 		} catch (error) {
 			console.error(error);
-			setEngineerError(
-				error instanceof Error ? error.message : "要員の登録に失敗しました。",
-			);
+
+			const message =
+				error instanceof Error ? error.message : "要員の登録に失敗しました。";
+
+			setEngineerError(message);
+
+			return {
+				success: false,
+				message,
+			};
 		}
 	};
 
-	const updateEngineer = async (updatedEngineer: Engineer) => {
+	const updateEngineer = async (
+		updatedEngineer: Engineer,
+	): Promise<ApiActionResult> => {
 		try {
 			setEngineerError("");
 
@@ -168,15 +188,28 @@ export function useEngineers() {
 					engineer.id === convertedEngineer.id ? convertedEngineer : engineer,
 				),
 			);
+
+			return {
+				success: true,
+			};
 		} catch (error) {
 			console.error(error);
-			setEngineerError(
-				error instanceof Error ? error.message : "要員の更新に失敗しました。",
-			);
+
+			const message =
+				error instanceof Error ? error.message : "要員の更新に失敗しました。";
+
+			setEngineerError(message);
+
+			return {
+				success: false,
+				message,
+			};
 		}
 	};
 
-	const deleteEngineer = async (engineerId: number) => {
+	const deleteEngineer = async (
+		engineerId: number,
+	): Promise<ApiActionResult> => {
 		try {
 			setEngineerError("");
 
@@ -200,15 +233,28 @@ export function useEngineers() {
 						: engineer,
 				),
 			);
+
+			return {
+				success: true,
+			};
 		} catch (error) {
 			console.error(error);
-			setEngineerError(
-				error instanceof Error ? error.message : "要員の削除に失敗しました。",
-			);
+
+			const message =
+				error instanceof Error ? error.message : "要員の削除に失敗しました。";
+
+			setEngineerError(message);
+
+			return {
+				success: false,
+				message,
+			};
 		}
 	};
 
-	const restoreEngineer = async (engineerId: number) => {
+	const restoreEngineer = async (
+		engineerId: number,
+	): Promise<ApiActionResult> => {
 		try {
 			setEngineerError("");
 
@@ -233,11 +279,22 @@ export function useEngineers() {
 					engineer.id === convertedEngineer.id ? convertedEngineer : engineer,
 				),
 			);
+
+			return {
+				success: true,
+			};
 		} catch (error) {
 			console.error(error);
-			setEngineerError(
-				error instanceof Error ? error.message : "要員の復元に失敗しました。",
-			);
+
+			const message =
+				error instanceof Error ? error.message : "要員の復元に失敗しました。";
+
+			setEngineerError(message);
+
+			return {
+				success: false,
+				message,
+			};
 		}
 	};
 
