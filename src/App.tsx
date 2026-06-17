@@ -55,6 +55,56 @@ type CreatingProposal = {
 	engineerId: number;
 };
 
+type ViewState = {
+	currentPage: Page;
+
+	isCreatingProject: boolean;
+	selectedProject: Project | null;
+	editingProject: Project | null;
+	selectedProjectId: number | null;
+
+	isCreatingEngineer: boolean;
+	selectedEngineer: Engineer | null;
+	editingEngineer: Engineer | null;
+
+	isCreatingSkill: boolean;
+	editingSkill: Skill | null;
+
+	isCreatingWorkRecord: boolean;
+	editingWorkRecord: WorkRecord | null;
+
+	creatingProposal: CreatingProposal | null;
+	selectedProposalHistory: ProposalHistory | null;
+	editingProposalHistory: ProposalHistory | null;
+	isCreatingProposalHistory: boolean;
+};
+
+const createBaseViewState = (page: Page): ViewState => {
+	return {
+		currentPage: page,
+
+		isCreatingProject: false,
+		selectedProject: null,
+		editingProject: null,
+		selectedProjectId: null,
+
+		isCreatingEngineer: false,
+		selectedEngineer: null,
+		editingEngineer: null,
+
+		isCreatingSkill: false,
+		editingSkill: null,
+
+		isCreatingWorkRecord: false,
+		editingWorkRecord: null,
+
+		creatingProposal: null,
+		selectedProposalHistory: null,
+		editingProposalHistory: null,
+		isCreatingProposalHistory: false,
+	};
+};
+
 const getPageFromHash = (): Page => {
 	const hashPage = window.location.hash.replace("#", "");
 
@@ -148,35 +198,100 @@ export default function App() {
 	const [isCreatingProposalHistory, setIsCreatingProposalHistory] =
 		useState(false);
 
-	const resetPageState = useCallback(() => {
-		setIsCreatingProject(false);
-		setSelectedProject(null);
-		setEditingProject(null);
-		setSelectedProjectId(null);
+	const applyViewState = useCallback((viewState: ViewState) => {
+		setCurrentPage(viewState.currentPage);
 
-		setIsCreatingEngineer(false);
-		setSelectedEngineer(null);
-		setEditingEngineer(null);
+		setIsCreatingProject(viewState.isCreatingProject);
+		setSelectedProject(viewState.selectedProject);
+		setEditingProject(viewState.editingProject);
+		setSelectedProjectId(viewState.selectedProjectId);
 
-		setIsCreatingProposalHistory(false);
+		setIsCreatingEngineer(viewState.isCreatingEngineer);
+		setSelectedEngineer(viewState.selectedEngineer);
+		setEditingEngineer(viewState.editingEngineer);
 
-		setIsCreatingSkill(false);
-		setEditingSkill(null);
+		setIsCreatingSkill(viewState.isCreatingSkill);
+		setEditingSkill(viewState.editingSkill);
 
-		setIsCreatingWorkRecord(false);
-		setEditingWorkRecord(null);
+		setIsCreatingWorkRecord(viewState.isCreatingWorkRecord);
+		setEditingWorkRecord(viewState.editingWorkRecord);
 
-		setCreatingProposal(null);
-		setSelectedProposalHistory(null);
-		setEditingProposalHistory(null);
+		setCreatingProposal(viewState.creatingProposal);
+		setSelectedProposalHistory(viewState.selectedProposalHistory);
+		setEditingProposalHistory(viewState.editingProposalHistory);
+		setIsCreatingProposalHistory(viewState.isCreatingProposalHistory);
 	}, []);
 
-	useEffect(() => {
-		const handlePopState = () => {
-			const page = getPageFromHash();
+	const getCurrentViewState = useCallback((): ViewState => {
+		return {
+			currentPage,
 
-			setCurrentPage(page);
-			resetPageState();
+			isCreatingProject,
+			selectedProject,
+			editingProject,
+			selectedProjectId,
+
+			isCreatingEngineer,
+			selectedEngineer,
+			editingEngineer,
+
+			isCreatingSkill,
+			editingSkill,
+
+			isCreatingWorkRecord,
+			editingWorkRecord,
+
+			creatingProposal,
+			selectedProposalHistory,
+			editingProposalHistory,
+			isCreatingProposalHistory,
+		};
+	}, [
+		currentPage,
+		isCreatingProject,
+		selectedProject,
+		editingProject,
+		selectedProjectId,
+		isCreatingEngineer,
+		selectedEngineer,
+		editingEngineer,
+		isCreatingSkill,
+		editingSkill,
+		isCreatingWorkRecord,
+		editingWorkRecord,
+		creatingProposal,
+		selectedProposalHistory,
+		editingProposalHistory,
+		isCreatingProposalHistory,
+	]);
+
+	const moveToViewState = useCallback(
+		(viewState: ViewState) => {
+			applyViewState(viewState);
+			window.history.pushState({ viewState }, "", `#${viewState.currentPage}`);
+		},
+		[applyViewState],
+	);
+
+	useEffect(() => {
+		const currentViewState = getCurrentViewState();
+
+		window.history.replaceState(
+			{ viewState: currentViewState },
+			"",
+			`#${currentViewState.currentPage}`,
+		);
+
+		const handlePopState = (event: PopStateEvent) => {
+			const viewState = event.state?.viewState as ViewState | undefined;
+
+			if (viewState) {
+				applyViewState(viewState);
+				return;
+			}
+
+			const page = getPageFromHash();
+			applyViewState(createBaseViewState(page));
 		};
 
 		window.addEventListener("popstate", handlePopState);
@@ -184,15 +299,10 @@ export default function App() {
 		return () => {
 			window.removeEventListener("popstate", handlePopState);
 		};
-	}, [resetPageState]);
+	}, [applyViewState, getCurrentViewState]);
 
 	const handleChangePage = (page: Page) => {
-		setCurrentPage(page);
-		resetPageState();
-
-		if (window.location.hash !== `#${page}`) {
-			window.history.pushState({ page }, "", `#${page}`);
-		}
+		moveToViewState(createBaseViewState(page));
 	};
 
 	const handleLogin = async (email: string, password: string) => {
@@ -202,9 +312,10 @@ export default function App() {
 			return false;
 		}
 
-		setCurrentPage("top");
-		resetPageState();
-		window.history.replaceState({ page: "top" }, "", "#top");
+		const topViewState = createBaseViewState("top");
+
+		applyViewState(topViewState);
+		window.history.replaceState({ viewState: topViewState }, "", "#top");
 
 		return true;
 	};
@@ -222,9 +333,10 @@ export default function App() {
 			return false;
 		}
 
-		setCurrentPage("top");
-		resetPageState();
-		window.history.replaceState({ page: "top" }, "", "#top");
+		const topViewState = createBaseViewState("top");
+
+		applyViewState(topViewState);
+		window.history.replaceState({ viewState: topViewState }, "", "#top");
 
 		return true;
 	};
@@ -233,9 +345,11 @@ export default function App() {
 		await logout();
 
 		setAuthMode("login");
-		setCurrentPage("top");
-		resetPageState();
-		window.history.replaceState({ page: "top" }, "", "#top");
+
+		const topViewState = createBaseViewState("top");
+
+		applyViewState(topViewState);
+		window.history.replaceState({ viewState: topViewState }, "", "#top");
 	};
 
 	const handleCreateProject = (project: Project) => {
@@ -476,10 +590,30 @@ export default function App() {
 					<ProjectListPage
 						currentUser={currentUser}
 						projects={projects}
-						onOpenCreate={() => setIsCreatingProject(true)}
-						onOpenDetail={(project) => setSelectedProject(project)}
-						onOpenEdit={(project) => setEditingProject(project)}
-						onOpenMatching={(projectId) => setSelectedProjectId(projectId)}
+						onOpenCreate={() =>
+							moveToViewState({
+								...createBaseViewState("projects"),
+								isCreatingProject: true,
+							})
+						}
+						onOpenDetail={(project) =>
+							moveToViewState({
+								...createBaseViewState("projects"),
+								selectedProject: project,
+							})
+						}
+						onOpenEdit={(project) =>
+							moveToViewState({
+								...createBaseViewState("projects"),
+								editingProject: project,
+							})
+						}
+						onOpenMatching={(projectId) =>
+							moveToViewState({
+								...createBaseViewState("projects"),
+								selectedProjectId: projectId,
+							})
+						}
 						onDelete={handleDeleteProject}
 						onRestore={handleRestoreProject}
 					/>
@@ -490,14 +624,14 @@ export default function App() {
 					currentUser={currentUser}
 					skills={skills}
 					onCreate={handleCreateProject}
-					onCancel={() => setIsCreatingProject(false)}
+					onCancel={() => moveToViewState(createBaseViewState("projects"))}
 				/>
 			)}
 
 			{currentPage === "projects" && selectedProject !== null && (
 				<ProjectDetailPage
 					project={selectedProject}
-					onBack={() => setSelectedProject(null)}
+					onBack={() => moveToViewState(createBaseViewState("projects"))}
 				/>
 			)}
 
@@ -506,7 +640,7 @@ export default function App() {
 					skills={skills}
 					project={editingProject}
 					onUpdate={handleUpdateProject}
-					onCancel={() => setEditingProject(null)}
+					onCancel={() => moveToViewState(createBaseViewState("projects"))}
 				/>
 			)}
 
@@ -521,9 +655,13 @@ export default function App() {
 						projects={projects}
 						engineers={engineers}
 						projectId={selectedProjectId}
-						onBack={() => setSelectedProjectId(null)}
+						onBack={() => moveToViewState(createBaseViewState("projects"))}
 						onCreateProposal={(projectId, engineerId) =>
-							setCreatingProposal({ projectId, engineerId })
+							moveToViewState({
+								...createBaseViewState("projects"),
+								selectedProjectId: projectId,
+								creatingProposal: { projectId, engineerId },
+							})
 						}
 					/>
 				)}
@@ -539,7 +677,12 @@ export default function App() {
 						engineers={engineers}
 						projectId={creatingProposal.projectId}
 						engineerId={creatingProposal.engineerId}
-						onBack={() => setCreatingProposal(null)}
+						onBack={() =>
+							moveToViewState({
+								...createBaseViewState("projects"),
+								selectedProjectId: creatingProposal.projectId,
+							})
+						}
 						onCreate={handleCreateProposalHistory}
 					/>
 				)}
@@ -551,9 +694,24 @@ export default function App() {
 					<EngineerListPage
 						currentUser={currentUser}
 						engineers={engineers}
-						onOpenCreate={() => setIsCreatingEngineer(true)}
-						onOpenDetail={(engineer) => setSelectedEngineer(engineer)}
-						onOpenEdit={(engineer) => setEditingEngineer(engineer)}
+						onOpenCreate={() =>
+							moveToViewState({
+								...createBaseViewState("engineers"),
+								isCreatingEngineer: true,
+							})
+						}
+						onOpenDetail={(engineer) =>
+							moveToViewState({
+								...createBaseViewState("engineers"),
+								selectedEngineer: engineer,
+							})
+						}
+						onOpenEdit={(engineer) =>
+							moveToViewState({
+								...createBaseViewState("engineers"),
+								editingEngineer: engineer,
+							})
+						}
 						onDelete={handleDeleteEngineer}
 						onRestore={handleRestoreEngineer}
 					/>
@@ -564,14 +722,14 @@ export default function App() {
 					currentUser={currentUser}
 					skills={skills}
 					onCreate={handleCreateEngineer}
-					onCancel={() => setIsCreatingEngineer(false)}
+					onCancel={() => moveToViewState(createBaseViewState("engineers"))}
 				/>
 			)}
 
 			{currentPage === "engineers" && selectedEngineer !== null && (
 				<EngineerDetailPage
 					engineer={selectedEngineer}
-					onBack={() => setSelectedEngineer(null)}
+					onBack={() => moveToViewState(createBaseViewState("engineers"))}
 				/>
 			)}
 
@@ -580,7 +738,7 @@ export default function App() {
 					skills={skills}
 					engineer={editingEngineer}
 					onUpdate={handleUpdateEngineer}
-					onCancel={() => setEditingEngineer(null)}
+					onCancel={() => moveToViewState(createBaseViewState("engineers"))}
 				/>
 			)}
 
@@ -589,8 +747,18 @@ export default function App() {
 				editingSkill === null && (
 					<SkillListPage
 						skills={skills}
-						onOpenCreate={() => setIsCreatingSkill(true)}
-						onOpenEdit={(skill) => setEditingSkill(skill)}
+						onOpenCreate={() =>
+							moveToViewState({
+								...createBaseViewState("skills"),
+								isCreatingSkill: true,
+							})
+						}
+						onOpenEdit={(skill) =>
+							moveToViewState({
+								...createBaseViewState("skills"),
+								editingSkill: skill,
+							})
+						}
 						onDelete={handleDeleteSkill}
 					/>
 				)}
@@ -599,7 +767,7 @@ export default function App() {
 				<SkillCreatePage
 					skills={skills}
 					onCreate={handleCreateSkill}
-					onCancel={() => setIsCreatingSkill(false)}
+					onCancel={() => moveToViewState(createBaseViewState("skills"))}
 				/>
 			)}
 
@@ -608,7 +776,7 @@ export default function App() {
 					skill={editingSkill}
 					skills={skills}
 					onUpdate={handleUpdateSkill}
-					onCancel={() => setEditingSkill(null)}
+					onCancel={() => moveToViewState(createBaseViewState("skills"))}
 				/>
 			)}
 
@@ -621,12 +789,23 @@ export default function App() {
 						proposalHistories={proposalHistories}
 						projects={projects}
 						engineers={engineers}
-						onOpenCreate={() => setIsCreatingProposalHistory(true)}
+						onOpenCreate={() =>
+							moveToViewState({
+								...createBaseViewState("proposals"),
+								isCreatingProposalHistory: true,
+							})
+						}
 						onShowDetail={(proposalHistory) =>
-							setSelectedProposalHistory(proposalHistory)
+							moveToViewState({
+								...createBaseViewState("proposals"),
+								selectedProposalHistory: proposalHistory,
+							})
 						}
 						onEdit={(proposalHistory) =>
-							setEditingProposalHistory(proposalHistory)
+							moveToViewState({
+								...createBaseViewState("proposals"),
+								editingProposalHistory: proposalHistory,
+							})
 						}
 						onDelete={handleDeleteProposalHistory}
 						onRestore={handleRestoreProposalHistory}
@@ -638,7 +817,7 @@ export default function App() {
 					projects={projects}
 					engineers={engineers}
 					onCreate={handleCreateProposalHistory}
-					onCancel={() => setIsCreatingProposalHistory(false)}
+					onCancel={() => moveToViewState(createBaseViewState("proposals"))}
 				/>
 			)}
 
@@ -647,7 +826,7 @@ export default function App() {
 					proposalHistory={selectedProposalHistory}
 					projects={projects}
 					engineers={engineers}
-					onBack={() => setSelectedProposalHistory(null)}
+					onBack={() => moveToViewState(createBaseViewState("proposals"))}
 				/>
 			)}
 
@@ -656,7 +835,7 @@ export default function App() {
 					proposalHistory={editingProposalHistory}
 					projects={projects}
 					engineers={engineers}
-					onBack={() => setEditingProposalHistory(null)}
+					onBack={() => moveToViewState(createBaseViewState("proposals"))}
 					onUpdate={handleUpdateProposalHistory}
 				/>
 			)}
@@ -668,8 +847,18 @@ export default function App() {
 						workRecords={workRecords}
 						projects={projects}
 						engineers={engineers}
-						onOpenCreate={() => setIsCreatingWorkRecord(true)}
-						onOpenEdit={(workRecord) => setEditingWorkRecord(workRecord)}
+						onOpenCreate={() =>
+							moveToViewState({
+								...createBaseViewState("workRecords"),
+								isCreatingWorkRecord: true,
+							})
+						}
+						onOpenEdit={(workRecord) =>
+							moveToViewState({
+								...createBaseViewState("workRecords"),
+								editingWorkRecord: workRecord,
+							})
+						}
 						onDelete={handleDeleteWorkRecord}
 						onRestore={handleRestoreWorkRecord}
 					/>
@@ -680,7 +869,7 @@ export default function App() {
 					projects={projects}
 					engineers={engineers}
 					onCreate={handleCreateWorkRecord}
-					onCancel={() => setIsCreatingWorkRecord(false)}
+					onCancel={() => moveToViewState(createBaseViewState("workRecords"))}
 				/>
 			)}
 
@@ -690,7 +879,7 @@ export default function App() {
 					engineers={engineers}
 					workRecord={editingWorkRecord}
 					onUpdate={handleUpdateWorkRecord}
-					onCancel={() => setEditingWorkRecord(null)}
+					onCancel={() => moveToViewState(createBaseViewState("workRecords"))}
 				/>
 			)}
 		</Layout>
