@@ -19,6 +19,11 @@ type ApiWorkRecord = {
 	updated_at: string;
 };
 
+type ApiActionResult = {
+	success: boolean;
+	message?: string;
+};
+
 const convertApiWorkRecordToWorkRecord = (
 	apiWorkRecord: ApiWorkRecord,
 ): WorkRecord => {
@@ -68,7 +73,9 @@ export function useWorkRecords() {
 		fetchWorkRecords();
 	}, []);
 
-	const createWorkRecord = async (workRecord: WorkRecord) => {
+	const createWorkRecord = async (
+		workRecord: WorkRecord,
+	): Promise<ApiActionResult> => {
 		try {
 			setWorkRecordError("");
 
@@ -100,17 +107,30 @@ export function useWorkRecords() {
 				convertApiWorkRecordToWorkRecord(createdWorkRecord);
 
 			setWorkRecords((prev) => [convertedWorkRecord, ...prev]);
+
+			return {
+				success: true,
+			};
 		} catch (error) {
 			console.error(error);
-			setWorkRecordError(
+
+			const message =
 				error instanceof Error
 					? error.message
-					: "稼働実績の登録に失敗しました。",
-			);
+					: "稼働実績の登録に失敗しました。";
+
+			setWorkRecordError(message);
+
+			return {
+				success: false,
+				message,
+			};
 		}
 	};
 
-	const updateWorkRecord = async (updatedWorkRecord: WorkRecord) => {
+	const updateWorkRecord = async (
+		updatedWorkRecord: WorkRecord,
+	): Promise<ApiActionResult> => {
 		try {
 			setWorkRecordError("");
 
@@ -151,17 +171,30 @@ export function useWorkRecords() {
 						: workRecord,
 				),
 			);
+
+			return {
+				success: true,
+			};
 		} catch (error) {
 			console.error(error);
-			setWorkRecordError(
+
+			const message =
 				error instanceof Error
 					? error.message
-					: "稼働実績の更新に失敗しました。",
-			);
+					: "稼働実績の更新に失敗しました。";
+
+			setWorkRecordError(message);
+
+			return {
+				success: false,
+				message,
+			};
 		}
 	};
 
-	const deleteWorkRecord = async (workRecordId: number) => {
+	const deleteWorkRecord = async (
+		workRecordId: number,
+	): Promise<ApiActionResult> => {
 		try {
 			setWorkRecordError("");
 
@@ -188,17 +221,30 @@ export function useWorkRecords() {
 						: workRecord,
 				),
 			);
+
+			return {
+				success: true,
+			};
 		} catch (error) {
 			console.error(error);
-			setWorkRecordError(
+
+			const message =
 				error instanceof Error
 					? error.message
-					: "稼働実績の削除に失敗しました。",
-			);
+					: "稼働実績の削除に失敗しました。";
+
+			setWorkRecordError(message);
+
+			return {
+				success: false,
+				message,
+			};
 		}
 	};
 
-	const restoreWorkRecord = async (workRecordId: number) => {
+	const restoreWorkRecord = async (
+		workRecordId: number,
+	): Promise<ApiActionResult> => {
 		try {
 			setWorkRecordError("");
 
@@ -226,13 +272,24 @@ export function useWorkRecords() {
 						: workRecord,
 				),
 			);
+
+			return {
+				success: true,
+			};
 		} catch (error) {
 			console.error(error);
-			setWorkRecordError(
+
+			const message =
 				error instanceof Error
 					? error.message
-					: "稼働実績の復元に失敗しました。",
-			);
+					: "稼働実績の復元に失敗しました。";
+
+			setWorkRecordError(message);
+
+			return {
+				success: false,
+				message,
+			};
 		}
 	};
 

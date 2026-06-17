@@ -474,34 +474,48 @@ export default function App() {
 		moveToViewState(createBaseViewState("skills"));
 	};
 
-	const handleCreateWorkRecord = (workRecord: WorkRecord) => {
-		createWorkRecord(workRecord);
+	const handleCreateWorkRecord = async (workRecord: WorkRecord) => {
+		const result = await createWorkRecord(workRecord);
 
-		setIsCreatingWorkRecord(false);
-		setEditingWorkRecord(null);
-		setCurrentPage("workRecords");
+		if (!result.success) {
+			alert(result.message ?? "稼働実績の登録に失敗しました。");
+			return;
+		}
+
+		moveToViewState(createBaseViewState("workRecords"));
 	};
 
-	const handleUpdateWorkRecord = (updatedWorkRecord: WorkRecord) => {
-		updateWorkRecord(updatedWorkRecord);
+	const handleUpdateWorkRecord = async (updatedWorkRecord: WorkRecord) => {
+		const result = await updateWorkRecord(updatedWorkRecord);
 
-		setIsCreatingWorkRecord(false);
-		setEditingWorkRecord(null);
-		setCurrentPage("workRecords");
+		if (!result.success) {
+			alert(result.message ?? "稼働実績の更新に失敗しました。");
+			return;
+		}
+
+		moveToViewState(createBaseViewState("workRecords"));
 	};
 
-	const handleDeleteWorkRecord = (workRecordId: number) => {
-		deleteWorkRecord(workRecordId);
+	const handleDeleteWorkRecord = async (workRecordId: number) => {
+		const result = await deleteWorkRecord(workRecordId);
 
-		setIsCreatingWorkRecord(false);
-		setEditingWorkRecord(null);
-		setCurrentPage("workRecords");
+		if (!result.success) {
+			alert(result.message ?? "稼働実績の削除に失敗しました。");
+			return;
+		}
+
+		moveToViewState(createBaseViewState("workRecords"));
 	};
 
-	const handleRestoreWorkRecord = (workRecordId: number) => {
-		restoreWorkRecord(workRecordId);
+	const handleRestoreWorkRecord = async (workRecordId: number) => {
+		const result = await restoreWorkRecord(workRecordId);
 
-		setCurrentPage("workRecords");
+		if (!result.success) {
+			alert(result.message ?? "稼働実績の復元に失敗しました。");
+			return;
+		}
+
+		moveToViewState(createBaseViewState("workRecords"));
 	};
 
 	const syncStatusesByProposalHistory = (proposalHistory: ProposalHistory) => {
