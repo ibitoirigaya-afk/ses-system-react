@@ -1,6 +1,6 @@
 # SES System React
 
-SES/BP営業管理システムのフロントエンドです。
+SES/BP営業管理システムのフロントエンドです。  
 React + TypeScript + Vite で構成し、Laravel API と接続しています。
 
 ## 使用技術
@@ -13,11 +13,62 @@ React + TypeScript + Vite で構成し、Laravel API と接続しています。
 * React Testing Library
 * Biome
 * Docker / Docker Compose
+* Makefile
+
+## 構成
+
+このシステムは、React側とAPI側を別リポジトリで管理しています。
+
+### React側
+
+```txt
+ses-system-react
+```
+
+役割：
+
+* 画面表示
+* 入力フォーム
+* 一覧・詳細・編集画面
+* Laravel API との通信
+
+起動URL：
+
+```txt
+http://localhost:5173
+```
+
+### API側
+
+```txt
+ses-system-api
+```
+
+役割：
+
+* Laravel API
+* PostgreSQL接続
+* 認証API
+* 案件・要員・スキル・提案履歴・稼働実績のCRUD API
+
+起動URL：
+
+```txt
+http://localhost:8000
+```
+
+API例：
+
+```txt
+http://localhost:8000/api/skills
+```
 
 ## 主な機能
 
-* ログイン画面
-* 新規登録画面
+* ログイン
+* 新規登録
+* ログアウト
+* ログイン中ユーザー復元
 * ロール別TOP画面
 * 案件管理
 * 要員管理
@@ -25,8 +76,48 @@ React + TypeScript + Vite で構成し、Laravel API と接続しています。
 * マッチング
 * 提案履歴管理
 * 稼働実績管理
-* 論理削除・復元
+* 論理削除
+* 復元
 * Laravel API連携
+
+## 認証機能
+
+認証は Laravel API と接続しています。
+
+使用API：
+
+```txt
+POST /api/login
+POST /api/register
+GET  /api/me
+POST /api/logout
+```
+
+現在は学習・開発用の簡易認証です。
+
+ログイン状態の維持には、React側で `currentUserId` のみ localStorage に保存しています。  
+ページ更新時は `/api/me?user_id=...` を呼び出してログイン中ユーザーを復元します。
+
+本格運用する場合は、Laravel Sanctum やトークン認証への変更を想定しています。
+
+## 初期ログインユーザー
+
+API側DBに以下のユーザーを作成して使用します。
+
+```txt
+管理者：admin@example.com / password
+要員担当：user@example.com / password
+企業担当：company@example.com / password
+```
+
+新規登録画面から作成できるロールは以下のみです。
+
+```txt
+user
+company
+```
+
+`admin` は新規登録画面から作成できない方針です。
 
 ## ロール
 
@@ -57,6 +148,56 @@ React + TypeScript + Vite で構成し、Laravel API と接続しています。
 * 案件マッチング
 * 提案履歴確認
 
+## API接続済み機能
+
+React側の主要機能は Laravel API と接続済みです。
+
+```txt
+useAuthUsers.ts
+→ /login
+→ /register
+→ /me
+→ /logout
+
+useSkills.ts
+→ /skills
+
+useProjects.ts
+→ /projects
+→ /projects/{id}
+→ /projects/{id}/restore
+
+useEngineers.ts
+→ /engineers
+→ /engineers/{id}
+→ /engineers/{id}/restore
+
+useProposalHistories.ts
+→ /proposal-histories
+→ /proposal-histories/{id}
+→ /proposal-histories/{id}/restore
+
+useWorkRecords.ts
+→ /work-records
+→ /work-records/{id}
+→ /work-records/{id}/restore
+```
+
+## mock / localStorage の扱い
+
+現在、以下のmockデータは撤去済みです。
+
+```txt
+mockUsers
+mockProjects
+mockEngineers
+mockSkills
+```
+
+また、案件・要員・スキル・提案履歴・稼働実績の保存は localStorage ではなく Laravel API を使用しています。
+
+残っている localStorage は、ログイン状態維持用の `currentUserId` のみです。
+
 ## セットアップ
 
 ### 1. パッケージをインストール
@@ -74,6 +215,12 @@ cp .env.example .env
 `.env` の内容：
 
 ```env
+VITE_API_BASE_URL=http://localhost:8000/api
+```
+
+または：
+
+```env
 VITE_API_BASE_URL=http://127.0.0.1:8000/api
 ```
 
@@ -86,7 +233,7 @@ npm run dev
 起動URL：
 
 ```txt
-http://127.0.0.1:5173
+http://localhost:5173
 ```
 
 ## Dockerで起動
@@ -121,7 +268,7 @@ make install
 make dev
 ```
 
-### ビルド
+### ビルド / Docker再ビルド起動
 
 ```bash
 make build
@@ -229,7 +376,13 @@ make check
 APIの接続先は `.env` で管理しています。
 
 ```env
-VITE_API_BASE_URL=http://127.0.0.1:8000/api
+VITE_API_BASE_URL=http://localhost:8000/api
+```
+
+各 hooks では、`.env` が読み込めない場合のfallbackとして以下を使用します。
+
+```txt
+http://localhost:8000/api
 ```
 
 API側は以下のリポジトリで管理しています。
@@ -238,33 +391,37 @@ API側は以下のリポジトリで管理しています。
 ses-system-api
 ```
 
-## 実装済み画面
+## 開発時の確認コマンド
 
-* LoginPage
-* RegisterPage
-* Dashboard
-* ProjectListPage
-* ProjectCreatePage
-* ProjectEditPage
-* ProjectDetailPage
-* EngineerListPage
-* EngineerCreatePage
-* EngineerEditPage
-* EngineerDetailPage
-* SkillListPage
-* ProposalHistoryListPage
-* ProposalHistoryCreatePage
-* ProposalHistoryEditPage
-* WorkRecordListPage
-* WorkRecordCreatePage
-* WorkRecordEditPage
+作業後は以下を実行します。
 
-## 補足
+```bash
+make format
+make lint
+make test
+git status
+```
 
-このアプリは、SES/BP営業で使う以下の業務を想定しています。
+## 現在の状態
 
-* 案件情報の管理
-* 要員情報の管理
-* 案件と要員のスキルマッチング
-* 提案履歴の管理
-* 稼働実績・売上・粗利の管理
+現在は以下まで完了しています。
+
+```txt
+ログインAPI化
+新規登録API化
+主要CRUDのAPI化
+mockデータ撤去
+localStorage保存の整理
+ブラウザバック対応
+format / lint / test 通過
+Docker起動確認
+```
+
+## 今後の改善候補
+
+* Laravel Sanctum などを使った本格認証
+* APIエラー表示の改善
+* ローディング表示の追加
+* 画面内詳細遷移のブラウザバック対応
+* E2Eテスト追加
+* READMEのAPI側リンク追記
