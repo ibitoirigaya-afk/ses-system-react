@@ -353,39 +353,48 @@ export default function App() {
 		window.history.replaceState({ viewState: topViewState }, "", "#top");
 	};
 
-	const handleCreateProject = (project: Project) => {
-		createProject(project);
+	const handleCreateProject = async (project: Project) => {
+		const result = await createProject(project);
 
-		setIsCreatingProject(false);
-		setSelectedProject(null);
-		setEditingProject(null);
-		setSelectedProjectId(null);
-		setCurrentPage("projects");
+		if (!result.success) {
+			alert(result.message ?? "案件の登録に失敗しました。");
+			return;
+		}
+
+		moveToViewState(createBaseViewState("projects"));
 	};
 
-	const handleUpdateProject = (updatedProject: Project) => {
-		updateProject(updatedProject);
+	const handleUpdateProject = async (updatedProject: Project) => {
+		const result = await updateProject(updatedProject);
 
-		setSelectedProject(null);
-		setEditingProject(null);
-		setIsCreatingProject(false);
-		setSelectedProjectId(null);
-		setCurrentPage("projects");
+		if (!result.success) {
+			alert(result.message ?? "案件の更新に失敗しました。");
+			return;
+		}
+
+		moveToViewState(createBaseViewState("projects"));
 	};
 
-	const handleDeleteProject = (projectId: number) => {
-		deleteProject(projectId);
+	const handleDeleteProject = async (projectId: number) => {
+		const result = await deleteProject(projectId);
 
-		setSelectedProject(null);
-		setEditingProject(null);
-		setSelectedProjectId(null);
-		setCurrentPage("projects");
+		if (!result.success) {
+			alert(result.message ?? "案件の削除に失敗しました。");
+			return;
+		}
+
+		moveToViewState(createBaseViewState("projects"));
 	};
 
-	const handleRestoreProject = (projectId: number) => {
-		restoreProject(projectId);
+	const handleRestoreProject = async (projectId: number) => {
+		const result = await restoreProject(projectId);
 
-		setCurrentPage("projects");
+		if (!result.success) {
+			alert(result.message ?? "案件の復元に失敗しました。");
+			return;
+		}
+
+		moveToViewState(createBaseViewState("projects"));
 	};
 
 	const handleCreateEngineer = (engineer: Engineer) => {

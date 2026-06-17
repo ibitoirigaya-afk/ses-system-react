@@ -19,6 +19,11 @@ type ApiProject = {
 	skills: Skill[];
 };
 
+type ApiActionResult = {
+	success: boolean;
+	message?: string;
+};
+
 const convertApiProjectToProject = (apiProject: ApiProject): Project => {
 	return {
 		id: apiProject.id,
@@ -65,7 +70,7 @@ export function useProjects() {
 		fetchProjects();
 	}, []);
 
-	const createProject = async (project: Project) => {
+	const createProject = async (project: Project): Promise<ApiActionResult> => {
 		try {
 			setProjectError("");
 
@@ -95,15 +100,28 @@ export function useProjects() {
 			const convertedProject = convertApiProjectToProject(createdProject);
 
 			setProjects((prev) => [convertedProject, ...prev]);
+
+			return {
+				success: true,
+			};
 		} catch (error) {
 			console.error(error);
-			setProjectError(
-				error instanceof Error ? error.message : "案件の登録に失敗しました。",
-			);
+
+			const message =
+				error instanceof Error ? error.message : "案件の登録に失敗しました。";
+
+			setProjectError(message);
+
+			return {
+				success: false,
+				message,
+			};
 		}
 	};
 
-	const updateProject = async (updatedProject: Project) => {
+	const updateProject = async (
+		updatedProject: Project,
+	): Promise<ApiActionResult> => {
 		try {
 			setProjectError("");
 
@@ -140,15 +158,26 @@ export function useProjects() {
 					project.id === convertedProject.id ? convertedProject : project,
 				),
 			);
+
+			return {
+				success: true,
+			};
 		} catch (error) {
 			console.error(error);
-			setProjectError(
-				error instanceof Error ? error.message : "案件の更新に失敗しました。",
-			);
+
+			const message =
+				error instanceof Error ? error.message : "案件の更新に失敗しました。";
+
+			setProjectError(message);
+
+			return {
+				success: false,
+				message,
+			};
 		}
 	};
 
-	const deleteProject = async (projectId: number) => {
+	const deleteProject = async (projectId: number): Promise<ApiActionResult> => {
 		try {
 			setProjectError("");
 
@@ -172,15 +201,28 @@ export function useProjects() {
 						: project,
 				),
 			);
+
+			return {
+				success: true,
+			};
 		} catch (error) {
 			console.error(error);
-			setProjectError(
-				error instanceof Error ? error.message : "案件の削除に失敗しました。",
-			);
+
+			const message =
+				error instanceof Error ? error.message : "案件の削除に失敗しました。";
+
+			setProjectError(message);
+
+			return {
+				success: false,
+				message,
+			};
 		}
 	};
 
-	const restoreProject = async (projectId: number) => {
+	const restoreProject = async (
+		projectId: number,
+	): Promise<ApiActionResult> => {
 		try {
 			setProjectError("");
 
@@ -205,11 +247,22 @@ export function useProjects() {
 					project.id === convertedProject.id ? convertedProject : project,
 				),
 			);
+
+			return {
+				success: true,
+			};
 		} catch (error) {
 			console.error(error);
-			setProjectError(
-				error instanceof Error ? error.message : "案件の復元に失敗しました。",
-			);
+
+			const message =
+				error instanceof Error ? error.message : "案件の復元に失敗しました。";
+
+			setProjectError(message);
+
+			return {
+				success: false,
+				message,
+			};
 		}
 	};
 
