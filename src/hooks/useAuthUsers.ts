@@ -42,11 +42,16 @@ export function useAuthUsers() {
 		loadFromStorage(STORAGE_KEYS.currentUserId, null),
 	);
 
+	const [isAuthLoading, setIsAuthLoading] = useState(true);
+
 	useEffect(() => {
 		const fetchCurrentUser = async () => {
+			setIsAuthLoading(true);
+
 			if (currentUserId === null) {
 				setCurrentUser(undefined);
 				removeFromStorage(STORAGE_KEYS.currentUserId);
+				setIsAuthLoading(false);
 				return;
 			}
 
@@ -67,6 +72,8 @@ export function useAuthUsers() {
 				saveToStorage(STORAGE_KEYS.currentUserId, data.user.id);
 			} catch {
 				setCurrentUser(undefined);
+			} finally {
+				setIsAuthLoading(false);
 			}
 		};
 
@@ -151,6 +158,7 @@ export function useAuthUsers() {
 	return {
 		currentUser,
 		currentUserId,
+		isAuthLoading,
 		login,
 		register,
 		logout,

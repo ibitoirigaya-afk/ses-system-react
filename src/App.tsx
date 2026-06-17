@@ -161,7 +161,8 @@ export default function App() {
 		restoreProposalHistory,
 	} = useProposalHistories();
 
-	const { currentUser, login, register, logout } = useAuthUsers();
+	const { currentUser, isAuthLoading, login, register, logout } =
+		useAuthUsers();
 
 	const [currentPage, setCurrentPage] = useState<Page>(() => getPageFromHash());
 
@@ -544,6 +545,16 @@ export default function App() {
 
 		setCurrentPage("proposals");
 	};
+
+	if (isAuthLoading) {
+		return (
+			<main className="flex min-h-screen items-center justify-center bg-gray-100">
+				<div className="rounded-2xl bg-white px-8 py-6 text-center shadow">
+					<p className="text-sm font-bold text-gray-700">読み込み中...</p>
+				</div>
+			</main>
+		);
+	}
 
 	if (!currentUser) {
 		if (authMode === "register") {
