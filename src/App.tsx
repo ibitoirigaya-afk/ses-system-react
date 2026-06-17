@@ -536,43 +536,64 @@ export default function App() {
 		);
 	};
 
-	const handleCreateProposalHistory = (proposalHistory: ProposalHistory) => {
-		createProposalHistory(proposalHistory);
+	const handleCreateProposalHistory = async (
+		proposalHistory: ProposalHistory,
+	) => {
+		const result = await createProposalHistory(proposalHistory);
+
+		if (!result.success) {
+			alert(result.message ?? "提案履歴の登録に失敗しました。");
+			return;
+		}
 
 		syncStatusesByProposalHistory(proposalHistory);
 
-		setCurrentPage("proposals");
-		setIsCreatingProposalHistory(false);
-		setSelectedProjectId(null);
-		setCreatingProposal(null);
-		setSelectedProposalHistory(null);
-		setEditingProposalHistory(null);
+		if (creatingProposal) {
+			moveToViewState({
+				...createBaseViewState("projects"),
+				selectedProjectId: creatingProposal.projectId,
+			});
+			return;
+		}
+
+		moveToViewState(createBaseViewState("proposals"));
 	};
 
-	const handleUpdateProposalHistory = (
+	const handleUpdateProposalHistory = async (
 		updatedProposalHistory: ProposalHistory,
 	) => {
-		updateProposalHistory(updatedProposalHistory);
+		const result = await updateProposalHistory(updatedProposalHistory);
+
+		if (!result.success) {
+			alert(result.message ?? "提案履歴の更新に失敗しました。");
+			return;
+		}
 
 		syncStatusesByProposalHistory(updatedProposalHistory);
 
-		setEditingProposalHistory(null);
-		setSelectedProposalHistory(null);
-		setCurrentPage("proposals");
+		moveToViewState(createBaseViewState("proposals"));
 	};
 
-	const handleDeleteProposalHistory = (proposalHistoryId: number) => {
-		deleteProposalHistory(proposalHistoryId);
+	const handleDeleteProposalHistory = async (proposalHistoryId: number) => {
+		const result = await deleteProposalHistory(proposalHistoryId);
 
-		setSelectedProposalHistory(null);
-		setEditingProposalHistory(null);
-		setCurrentPage("proposals");
+		if (!result.success) {
+			alert(result.message ?? "提案履歴の削除に失敗しました。");
+			return;
+		}
+
+		moveToViewState(createBaseViewState("proposals"));
 	};
 
-	const handleRestoreProposalHistory = (proposalHistoryId: number) => {
-		restoreProposalHistory(proposalHistoryId);
+	const handleRestoreProposalHistory = async (proposalHistoryId: number) => {
+		const result = await restoreProposalHistory(proposalHistoryId);
 
-		setCurrentPage("proposals");
+		if (!result.success) {
+			alert(result.message ?? "提案履歴の復元に失敗しました。");
+			return;
+		}
+
+		moveToViewState(createBaseViewState("proposals"));
 	};
 
 	if (isAuthLoading) {

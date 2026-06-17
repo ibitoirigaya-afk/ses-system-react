@@ -18,6 +18,11 @@ type ApiProposalHistory = {
 	updated_at: string;
 };
 
+type ApiActionResult = {
+	success: boolean;
+	message?: string;
+};
+
 const convertApiProposalHistoryToProposalHistory = (
 	apiProposalHistory: ApiProposalHistory,
 ): ProposalHistory => {
@@ -73,7 +78,9 @@ export function useProposalHistories() {
 		fetchProposalHistories();
 	}, []);
 
-	const createProposalHistory = async (proposalHistory: ProposalHistory) => {
+	const createProposalHistory = async (
+		proposalHistory: ProposalHistory,
+	): Promise<ApiActionResult> => {
 		try {
 			setProposalHistoryError("");
 
@@ -104,19 +111,30 @@ export function useProposalHistories() {
 				convertApiProposalHistoryToProposalHistory(createdProposalHistory);
 
 			setProposalHistories((prev) => [convertedProposalHistory, ...prev]);
+
+			return {
+				success: true,
+			};
 		} catch (error) {
 			console.error(error);
-			setProposalHistoryError(
+
+			const message =
 				error instanceof Error
 					? error.message
-					: "提案履歴の登録に失敗しました。",
-			);
+					: "提案履歴の登録に失敗しました。";
+
+			setProposalHistoryError(message);
+
+			return {
+				success: false,
+				message,
+			};
 		}
 	};
 
 	const updateProposalHistory = async (
 		updatedProposalHistory: ProposalHistory,
-	) => {
+	): Promise<ApiActionResult> => {
 		try {
 			setProposalHistoryError("");
 
@@ -156,17 +174,30 @@ export function useProposalHistories() {
 						: proposalHistory,
 				),
 			);
+
+			return {
+				success: true,
+			};
 		} catch (error) {
 			console.error(error);
-			setProposalHistoryError(
+
+			const message =
 				error instanceof Error
 					? error.message
-					: "提案履歴の更新に失敗しました。",
-			);
+					: "提案履歴の更新に失敗しました。";
+
+			setProposalHistoryError(message);
+
+			return {
+				success: false,
+				message,
+			};
 		}
 	};
 
-	const deleteProposalHistory = async (proposalHistoryId: number) => {
+	const deleteProposalHistory = async (
+		proposalHistoryId: number,
+	): Promise<ApiActionResult> => {
 		try {
 			setProposalHistoryError("");
 
@@ -193,17 +224,30 @@ export function useProposalHistories() {
 						: proposalHistory,
 				),
 			);
+
+			return {
+				success: true,
+			};
 		} catch (error) {
 			console.error(error);
-			setProposalHistoryError(
+
+			const message =
 				error instanceof Error
 					? error.message
-					: "提案履歴の削除に失敗しました。",
-			);
+					: "提案履歴の削除に失敗しました。";
+
+			setProposalHistoryError(message);
+
+			return {
+				success: false,
+				message,
+			};
 		}
 	};
 
-	const restoreProposalHistory = async (proposalHistoryId: number) => {
+	const restoreProposalHistory = async (
+		proposalHistoryId: number,
+	): Promise<ApiActionResult> => {
 		try {
 			setProposalHistoryError("");
 
@@ -231,13 +275,24 @@ export function useProposalHistories() {
 						: proposalHistory,
 				),
 			);
+
+			return {
+				success: true,
+			};
 		} catch (error) {
 			console.error(error);
-			setProposalHistoryError(
+
+			const message =
 				error instanceof Error
 					? error.message
-					: "提案履歴の復元に失敗しました。",
-			);
+					: "提案履歴の復元に失敗しました。";
+
+			setProposalHistoryError(message);
+
+			return {
+				success: false,
+				message,
+			};
 		}
 	};
 
