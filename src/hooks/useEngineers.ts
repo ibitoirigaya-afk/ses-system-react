@@ -1,311 +1,318 @@
 import { useEffect, useState } from "react";
 import type { Engineer } from "../features/engineers/engineerTypes";
 import type { Skill } from "../features/skills/skillTypes";
+import type { BpCompany } from "../features/bpCompanies/bpCompanyTypes";
 
 const API_BASE_URL =
-	import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000/api";
+  import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000/api";
 
 type ApiEngineer = {
-	id: number;
-	user_id: number;
-	name: string;
-	company_name: string;
-	age: number;
-	gender: string;
-	nearest_station: string;
-	desired_unit_price: number;
-	experience_years: number;
-	available_date: string;
-	desired_location: string;
-	desired_conditions: string;
-	career_summary: string;
-	status: Engineer["status"];
-	deleted_at: string | null;
-	created_at: string;
-	updated_at: string;
-	skills: Skill[];
+  id: number;
+  user_id: number;
+  bp_company_id: number | null;
+  bp_company: BpCompany | null;
+  name: string;
+  company_name: string;
+  age: number;
+  gender: string;
+  nearest_station: string;
+  desired_unit_price: number;
+  experience_years: number;
+  available_date: string;
+  desired_location: string;
+  desired_conditions: string;
+  career_summary: string;
+  status: Engineer["status"];
+  deleted_at: string | null;
+  created_at: string;
+  updated_at: string;
+  skills: Skill[];
 };
 
 type ApiActionResult = {
-	success: boolean;
-	message?: string;
+  success: boolean;
+  message?: string;
 };
 
 const convertApiEngineerToEngineer = (apiEngineer: ApiEngineer): Engineer => {
-	return {
-		id: apiEngineer.id,
-		userId: apiEngineer.user_id,
-		name: apiEngineer.name,
-		companyName: apiEngineer.company_name,
-		age: apiEngineer.age,
-		gender: apiEngineer.gender,
-		nearestStation: apiEngineer.nearest_station,
-		desiredUnitPrice: apiEngineer.desired_unit_price,
-		experienceYears: apiEngineer.experience_years,
-		availableDate: apiEngineer.available_date.slice(0, 10),
-		desiredLocation: apiEngineer.desired_location,
-		desiredConditions: apiEngineer.desired_conditions,
-		careerSummary: apiEngineer.career_summary,
-		status: apiEngineer.status,
-		skills: apiEngineer.skills,
-		deletedAt: apiEngineer.deleted_at,
-	};
+  return {
+    id: apiEngineer.id,
+    userId: apiEngineer.user_id,
+    bpCompanyId: apiEngineer.bp_company_id,
+    bpCompany: apiEngineer.bp_company,
+    name: apiEngineer.name,
+    companyName: apiEngineer.company_name,
+    age: apiEngineer.age,
+    gender: apiEngineer.gender,
+    nearestStation: apiEngineer.nearest_station,
+    desiredUnitPrice: apiEngineer.desired_unit_price,
+    experienceYears: apiEngineer.experience_years,
+    availableDate: apiEngineer.available_date.slice(0, 10),
+    desiredLocation: apiEngineer.desired_location,
+    desiredConditions: apiEngineer.desired_conditions,
+    careerSummary: apiEngineer.career_summary,
+    status: apiEngineer.status,
+    skills: apiEngineer.skills,
+    deletedAt: apiEngineer.deleted_at,
+  };
 };
 
 export function useEngineers() {
-	const [engineers, setEngineers] = useState<Engineer[]>([]);
-	const [isLoadingEngineers, setIsLoadingEngineers] = useState(true);
-	const [engineerError, setEngineerError] = useState("");
+  const [engineers, setEngineers] = useState<Engineer[]>([]);
+  const [isLoadingEngineers, setIsLoadingEngineers] = useState(true);
+  const [engineerError, setEngineerError] = useState("");
 
-	useEffect(() => {
-		const fetchEngineers = async () => {
-			try {
-				setIsLoadingEngineers(true);
-				setEngineerError("");
+  useEffect(() => {
+    const fetchEngineers = async () => {
+      try {
+        setIsLoadingEngineers(true);
+        setEngineerError("");
 
-				const response = await fetch(`${API_BASE_URL}/engineers`);
+        const response = await fetch(`${API_BASE_URL}/engineers`);
 
-				if (!response.ok) {
-					throw new Error("要員一覧の取得に失敗しました。");
-				}
+        if (!response.ok) {
+          throw new Error("要員一覧の取得に失敗しました。");
+        }
 
-				const data: ApiEngineer[] = await response.json();
-				const convertedEngineers = data.map(convertApiEngineerToEngineer);
+        const data: ApiEngineer[] = await response.json();
+        const convertedEngineers = data.map(convertApiEngineerToEngineer);
 
-				setEngineers(convertedEngineers);
-			} catch (error) {
-				console.error(error);
-				setEngineerError("要員一覧の取得に失敗しました。");
-			} finally {
-				setIsLoadingEngineers(false);
-			}
-		};
+        setEngineers(convertedEngineers);
+      } catch (error) {
+        console.error(error);
+        setEngineerError("要員一覧の取得に失敗しました。");
+      } finally {
+        setIsLoadingEngineers(false);
+      }
+    };
 
-		fetchEngineers();
-	}, []);
+    fetchEngineers();
+  }, []);
 
-	const createEngineer = async (
-		engineer: Engineer,
-	): Promise<ApiActionResult> => {
-		try {
-			setEngineerError("");
+  const createEngineer = async (
+    engineer: Engineer,
+  ): Promise<ApiActionResult> => {
+    try {
+      setEngineerError("");
 
-			const response = await fetch(`${API_BASE_URL}/engineers`, {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
-				},
-				body: JSON.stringify({
-					user_id: engineer.userId,
-					name: engineer.name,
-					company_name: engineer.companyName,
-					age: engineer.age,
-					gender: engineer.gender,
-					nearest_station: engineer.nearestStation,
-					desired_unit_price: engineer.desiredUnitPrice,
-					experience_years: engineer.experienceYears,
-					available_date: engineer.availableDate,
-					desired_location: engineer.desiredLocation,
-					desired_conditions: engineer.desiredConditions,
-					career_summary: engineer.careerSummary,
-					status: engineer.status,
-					skill_ids: engineer.skills.map((skill) => skill.id),
-				}),
-			});
+      const response = await fetch(`${API_BASE_URL}/engineers`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          user_id: engineer.userId,
+          bp_company_id: engineer.bpCompanyId,
+          name: engineer.name,
+          company_name: engineer.companyName,
+          age: engineer.age,
+          gender: engineer.gender,
+          nearest_station: engineer.nearestStation,
+          desired_unit_price: engineer.desiredUnitPrice,
+          experience_years: engineer.experienceYears,
+          available_date: engineer.availableDate,
+          desired_location: engineer.desiredLocation,
+          desired_conditions: engineer.desiredConditions,
+          career_summary: engineer.careerSummary,
+          status: engineer.status,
+          skill_ids: engineer.skills.map((skill) => skill.id),
+        }),
+      });
 
-			if (!response.ok) {
-				const errorData = await response.json().catch(() => null);
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => null);
 
-				throw new Error(errorData?.message ?? "要員の登録に失敗しました。");
-			}
+        throw new Error(errorData?.message ?? "要員の登録に失敗しました。");
+      }
 
-			const createdEngineer: ApiEngineer = await response.json();
-			const convertedEngineer = convertApiEngineerToEngineer(createdEngineer);
+      const createdEngineer: ApiEngineer = await response.json();
+      const convertedEngineer = convertApiEngineerToEngineer(createdEngineer);
 
-			setEngineers((prev) => [convertedEngineer, ...prev]);
+      setEngineers((prev) => [convertedEngineer, ...prev]);
 
-			return {
-				success: true,
-			};
-		} catch (error) {
-			console.error(error);
+      return {
+        success: true,
+      };
+    } catch (error) {
+      console.error(error);
 
-			const message =
-				error instanceof Error ? error.message : "要員の登録に失敗しました。";
+      const message =
+        error instanceof Error ? error.message : "要員の登録に失敗しました。";
 
-			setEngineerError(message);
+      setEngineerError(message);
 
-			return {
-				success: false,
-				message,
-			};
-		}
-	};
+      return {
+        success: false,
+        message,
+      };
+    }
+  };
 
-	const updateEngineer = async (
-		updatedEngineer: Engineer,
-	): Promise<ApiActionResult> => {
-		try {
-			setEngineerError("");
+  const updateEngineer = async (
+    updatedEngineer: Engineer,
+  ): Promise<ApiActionResult> => {
+    try {
+      setEngineerError("");
 
-			const response = await fetch(
-				`${API_BASE_URL}/engineers/${updatedEngineer.id}`,
-				{
-					method: "PUT",
-					headers: {
-						"Content-Type": "application/json",
-					},
-					body: JSON.stringify({
-						user_id: updatedEngineer.userId,
-						name: updatedEngineer.name,
-						company_name: updatedEngineer.companyName,
-						age: updatedEngineer.age,
-						gender: updatedEngineer.gender,
-						nearest_station: updatedEngineer.nearestStation,
-						desired_unit_price: updatedEngineer.desiredUnitPrice,
-						experience_years: updatedEngineer.experienceYears,
-						available_date: updatedEngineer.availableDate,
-						desired_location: updatedEngineer.desiredLocation,
-						desired_conditions: updatedEngineer.desiredConditions,
-						career_summary: updatedEngineer.careerSummary,
-						status: updatedEngineer.status,
-						skill_ids: updatedEngineer.skills.map((skill) => skill.id),
-					}),
-				},
-			);
+      const response = await fetch(
+        `${API_BASE_URL}/engineers/${updatedEngineer.id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            user_id: updatedEngineer.userId,
+            bp_company_id: updatedEngineer.bpCompanyId,
+            name: updatedEngineer.name,
+            company_name: updatedEngineer.companyName,
+            age: updatedEngineer.age,
+            gender: updatedEngineer.gender,
+            nearest_station: updatedEngineer.nearestStation,
+            desired_unit_price: updatedEngineer.desiredUnitPrice,
+            experience_years: updatedEngineer.experienceYears,
+            available_date: updatedEngineer.availableDate,
+            desired_location: updatedEngineer.desiredLocation,
+            desired_conditions: updatedEngineer.desiredConditions,
+            career_summary: updatedEngineer.careerSummary,
+            status: updatedEngineer.status,
+            skill_ids: updatedEngineer.skills.map((skill) => skill.id),
+          }),
+        },
+      );
 
-			if (!response.ok) {
-				const errorData = await response.json().catch(() => null);
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => null);
 
-				throw new Error(errorData?.message ?? "要員の更新に失敗しました。");
-			}
+        throw new Error(errorData?.message ?? "要員の更新に失敗しました。");
+      }
 
-			const savedEngineer: ApiEngineer = await response.json();
-			const convertedEngineer = convertApiEngineerToEngineer(savedEngineer);
+      const savedEngineer: ApiEngineer = await response.json();
+      const convertedEngineer = convertApiEngineerToEngineer(savedEngineer);
 
-			setEngineers((prev) =>
-				prev.map((engineer) =>
-					engineer.id === convertedEngineer.id ? convertedEngineer : engineer,
-				),
-			);
+      setEngineers((prev) =>
+        prev.map((engineer) =>
+          engineer.id === convertedEngineer.id ? convertedEngineer : engineer,
+        ),
+      );
 
-			return {
-				success: true,
-			};
-		} catch (error) {
-			console.error(error);
+      return {
+        success: true,
+      };
+    } catch (error) {
+      console.error(error);
 
-			const message =
-				error instanceof Error ? error.message : "要員の更新に失敗しました。";
+      const message =
+        error instanceof Error ? error.message : "要員の更新に失敗しました。";
 
-			setEngineerError(message);
+      setEngineerError(message);
 
-			return {
-				success: false,
-				message,
-			};
-		}
-	};
+      return {
+        success: false,
+        message,
+      };
+    }
+  };
 
-	const deleteEngineer = async (
-		engineerId: number,
-	): Promise<ApiActionResult> => {
-		try {
-			setEngineerError("");
+  const deleteEngineer = async (
+    engineerId: number,
+  ): Promise<ApiActionResult> => {
+    try {
+      setEngineerError("");
 
-			const response = await fetch(`${API_BASE_URL}/engineers/${engineerId}`, {
-				method: "DELETE",
-			});
+      const response = await fetch(`${API_BASE_URL}/engineers/${engineerId}`, {
+        method: "DELETE",
+      });
 
-			if (!response.ok) {
-				const errorData = await response.json().catch(() => null);
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => null);
 
-				throw new Error(errorData?.message ?? "要員の削除に失敗しました。");
-			}
+        throw new Error(errorData?.message ?? "要員の削除に失敗しました。");
+      }
 
-			setEngineers((prev) =>
-				prev.map((engineer) =>
-					engineer.id === engineerId
-						? {
-								...engineer,
-								deletedAt: new Date().toISOString(),
-							}
-						: engineer,
-				),
-			);
+      setEngineers((prev) =>
+        prev.map((engineer) =>
+          engineer.id === engineerId
+            ? {
+              ...engineer,
+              deletedAt: new Date().toISOString(),
+            }
+            : engineer,
+        ),
+      );
 
-			return {
-				success: true,
-			};
-		} catch (error) {
-			console.error(error);
+      return {
+        success: true,
+      };
+    } catch (error) {
+      console.error(error);
 
-			const message =
-				error instanceof Error ? error.message : "要員の削除に失敗しました。";
+      const message =
+        error instanceof Error ? error.message : "要員の削除に失敗しました。";
 
-			setEngineerError(message);
+      setEngineerError(message);
 
-			return {
-				success: false,
-				message,
-			};
-		}
-	};
+      return {
+        success: false,
+        message,
+      };
+    }
+  };
 
-	const restoreEngineer = async (
-		engineerId: number,
-	): Promise<ApiActionResult> => {
-		try {
-			setEngineerError("");
+  const restoreEngineer = async (
+    engineerId: number,
+  ): Promise<ApiActionResult> => {
+    try {
+      setEngineerError("");
 
-			const response = await fetch(
-				`${API_BASE_URL}/engineers/${engineerId}/restore`,
-				{
-					method: "PATCH",
-				},
-			);
+      const response = await fetch(
+        `${API_BASE_URL}/engineers/${engineerId}/restore`,
+        {
+          method: "PATCH",
+        },
+      );
 
-			if (!response.ok) {
-				const errorData = await response.json().catch(() => null);
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => null);
 
-				throw new Error(errorData?.message ?? "要員の復元に失敗しました。");
-			}
+        throw new Error(errorData?.message ?? "要員の復元に失敗しました。");
+      }
 
-			const restoredEngineer: ApiEngineer = await response.json();
-			const convertedEngineer = convertApiEngineerToEngineer(restoredEngineer);
+      const restoredEngineer: ApiEngineer = await response.json();
+      const convertedEngineer = convertApiEngineerToEngineer(restoredEngineer);
 
-			setEngineers((prev) =>
-				prev.map((engineer) =>
-					engineer.id === convertedEngineer.id ? convertedEngineer : engineer,
-				),
-			);
+      setEngineers((prev) =>
+        prev.map((engineer) =>
+          engineer.id === convertedEngineer.id ? convertedEngineer : engineer,
+        ),
+      );
 
-			return {
-				success: true,
-			};
-		} catch (error) {
-			console.error(error);
+      return {
+        success: true,
+      };
+    } catch (error) {
+      console.error(error);
 
-			const message =
-				error instanceof Error ? error.message : "要員の復元に失敗しました。";
+      const message =
+        error instanceof Error ? error.message : "要員の復元に失敗しました。";
 
-			setEngineerError(message);
+      setEngineerError(message);
 
-			return {
-				success: false,
-				message,
-			};
-		}
-	};
+      return {
+        success: false,
+        message,
+      };
+    }
+  };
 
-	return {
-		engineers,
-		setEngineers,
-		isLoadingEngineers,
-		engineerError,
-		createEngineer,
-		updateEngineer,
-		deleteEngineer,
-		restoreEngineer,
-	};
+  return {
+    engineers,
+    setEngineers,
+    isLoadingEngineers,
+    engineerError,
+    createEngineer,
+    updateEngineer,
+    deleteEngineer,
+    restoreEngineer,
+  };
 }
