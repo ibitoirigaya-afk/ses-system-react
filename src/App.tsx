@@ -900,11 +900,13 @@ export default function App() {
 			{currentPage === "bpCompanies" && selectedBpCompany !== null && (
 				<BpCompanyDetailPage
 					bpCompany={selectedBpCompany}
+					engineers={engineers}
 					onBack={() => moveToViewState(createBaseViewState("bpCompanies"))}
-					onEdit={(bpCompany) =>
+					onEdit={() =>
 						moveToViewState({
-							...createBaseViewState("bpCompanies"),
-							editingBpCompany: bpCompany,
+							...getCurrentViewState(),
+							selectedBpCompany: null,
+							editingBpCompany: selectedBpCompany,
 						})
 					}
 				/>
