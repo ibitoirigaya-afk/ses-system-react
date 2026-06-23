@@ -80,6 +80,11 @@ http://localhost:8000/api/skills
 * 復元
 * ブラウザ戻る対応
 * Laravel API連携
+* BP企業管理
+* BP企業と要員の紐付け
+* BP企業詳細で所属要員一覧表示
+* 案件詳細で候補要員一覧表示
+* 共通スキル数・スキル一致率による候補要員表示
 
 ## 認証機能
 
@@ -184,6 +189,11 @@ useWorkRecords.ts
 → /work-records
 → /work-records/{id}
 → /work-records/{id}/restore
+
+useBpCompanies.ts
+→ /bp-companies
+→ /bp-companies/{id}
+→ /bp-companies/{id}/restore
 ```
 
 ## mock / localStorage の扱い
@@ -383,8 +393,12 @@ make test
 テスト対象：
 
 * StatusBadge
+* LoginPage
+* RegisterPage
 * ProjectForm
 * EngineerForm
+* SkillForm
+* WorkRecordForm
 
 確認内容：
 
@@ -461,6 +475,11 @@ localStorage保存の整理
 認証復元中のローディング表示
 format / lint / test 通過
 Docker起動確認
+BP企業管理機能追加
+要員とBP企業の紐付け
+BP企業詳細で所属要員一覧表示
+案件詳細で候補要員一覧表示
+共通スキル数・スキル一致率によるマッチング表示
 ```
 
 ## 今後の改善候補
